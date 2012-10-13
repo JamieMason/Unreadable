@@ -1,0 +1,45 @@
+#!/bin/bash
+# Argument = -t test -r server -p password -v
+
+usage() {
+cat << EOF
+usage: $0 options
+
+This script run the test1 or test2 over a machine.
+
+OPTIONS:
+  -h    Show this message
+  -u    URL to process
+  -t    Task name to perform
+EOF
+}
+
+URL=
+TASK=
+while getopts "hu:t:" OPTION
+do
+  case $OPTION in
+    h)
+      usage
+      exit 1
+      ;;
+    u)
+      URL=$OPTARG
+      ;;
+    t)
+      TASK=$OPTARG
+      ;;
+    ?)
+      usage
+      exit
+      ;;
+  esac
+done
+
+if [[ -z $URL ]] || [[ -z $TASK ]]
+then
+  usage
+  exit 1
+fi
+
+casperjs "${PWD}/src/js/asterisk.js" --cwd=$PWD --url=$URL --task=$TASK
