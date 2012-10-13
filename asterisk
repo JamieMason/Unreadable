@@ -1,11 +1,10 @@
 #!/bin/bash
-# Argument = -t test -r server -p password -v
 
 usage() {
 cat << EOF
 usage: $0 options
 
-This script run the test1 or test2 over a machine.
+Applies a named task to be performed on a web page.
 
 OPTIONS:
   -h    Show this message
