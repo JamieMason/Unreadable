@@ -55,6 +55,7 @@ class TreeCrawler
        * Default no-op element processors at TreeCrawler.prototype.ELEMENT_NODE intended to be overridden
        * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
        * @param  {HTMLElement}  el
+       * @param  {String}       type     eg ELEMENT_NODE
        * @memberOf TreeCrawler.prototype
        */
       process: ->
@@ -75,8 +76,9 @@ class TreeCrawler
    * @static
    */
   @processNodeByType = !(crawler, el) ->
-    nodeTypes = crawler.nodeTypes
-    nodeType.process(crawler, el) if nodeType = crawler[crawler.nodeTypes[el.nodeType]]
+    lookup = crawler.nodeTypes
+    typeName = lookup[el.nodeType]
+    nodeType.process(crawler, el, typeName) if nodeType = crawler[typeName]
 
   /**
    * Recursively apply the iterator to el, it's children and their descendents
