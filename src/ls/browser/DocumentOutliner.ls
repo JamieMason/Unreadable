@@ -23,7 +23,8 @@ class DocumentOutliner extends TreeCrawler
           value = ['"', '"'].join(value)
         [name, value].join('=')
 
-  prototype.nodeTypes.ELEMENT_NODE.process = (crawler, el) ->
-    crawler.output.push("#{' ' * (crawler.depth * 2)}#{el.nodeName.toLowerCase()} #{DocumentOutliner.getAttributesHtml(el).join(' ')}")
+  ELEMENT_NODE:
+    process: (crawler, el) ->
+      crawler.output.push("#{' ' * (crawler.depth * 2)}#{el.nodeName.toLowerCase()} #{DocumentOutliner.getAttributesHtml(el).join(' ')}")
 
 window.DocumentOutliner = DocumentOutliner

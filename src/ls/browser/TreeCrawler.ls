@@ -29,16 +29,16 @@ class TreeCrawler
     '11' : 'DOCUMENT_FRAGMENT_NODE'
     '12' : 'NOTATION_NODE'
 
-  # extend nodeTypes
+  # create default no-op processors
   for type, name of prototype.nodeTypes
-    prototype.nodeTypes[name] =
+    prototype[name] =
       process: ->
 
   # Statics
   # --------------------------------------------------
   @processNodeByType = !(crawler, el) ->
     nodeTypes = crawler.nodeTypes
-    nodeType.process(crawler, el) if nodeType = nodeTypes[nodeTypes[el.nodeType]]
+    nodeType.process(crawler, el) if nodeType = crawler[crawler.nodeTypes[el.nodeType]]
 
   @each = !(el, iterator) ->
     for child in children = el.childNodes
