@@ -25,19 +25,24 @@ task = phantom.casperArgs.get('task')
 casper = require('casper').create(
   verbose: false
   logLevel: 'error'
+  javascriptEnabled: false
+  loadImages: false
+  loadPlugins: false
   onError: (self, message) ->
     console.error(message)
     self.exit!
   clientScripts:
     cwd + '/src/js/browser/TreeCrawler.js'
     cwd + '/src/js/browser/DocumentSummary.js'
+    cwd + '/src/js/browser/NaiveMinify.js'
 )
 
 /* validate task name */
-casper.die("There is no task called \"#{task}\"") if task.search(/^(summary)$/) is -1
+casper.die("There is no task called \"#{task}\"") if task.search(/^(summary|minify)$/) is -1
 
 /* map the task option name to it's Class */
 task = 'DocumentSummary' if task is 'summary'
+task = 'NaiveMinify' if task is 'minify'
 
 /* Visit the URL and perform the chosen task */
 casper.start url, ->
