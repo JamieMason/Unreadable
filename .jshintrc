@@ -10,6 +10,7 @@
     "exports",
     "it",
     "jasmine",
+    "phantom",
     "runs",
     "spyOn",
     "waits",
