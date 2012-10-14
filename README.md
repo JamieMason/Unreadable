@@ -11,7 +11,7 @@ An extensible CasperJS DOM utility for analysis and/or transformation of web pag
 
     # -u URL
     # -t Task name
-    ./asterisk -u http://google.com -t outline
+    ./asterisk -u http://google.com -t summary
 
 ### Dependencies
 

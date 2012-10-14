@@ -4,14 +4,14 @@
  */
 
 /**
- * @class    DocumentOutliner
+ * @class    DocumentSummary
  * @extends  TreeCrawler
  */
-class DocumentOutliner extends TreeCrawler
+class DocumentSummary extends TreeCrawler
 
   /**
    * @see TreeCrawler#reset
-   * @memberOf DocumentOutliner.prototype
+   * @memberOf DocumentSummary.prototype
    */
   reset: ->
     super!
@@ -48,11 +48,11 @@ class DocumentOutliner extends TreeCrawler
      * Return a more legible summary of the HTML document
      * @return {String}
      * @see TreeCrawler.prototype#process
-     * @memberOf DocumentOutliner.prototype
+     * @memberOf DocumentSummary.prototype
      */
     process: (crawler, el) ->
       indentation = ' ' * (crawler.depth * 2)
       element = el.nodeName.toLowerCase!
-      attrs = DocumentOutliner.outputAttrs(el)
+      attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
       crawler.output.push("#{indentation}#{element}#{attrs}\n")

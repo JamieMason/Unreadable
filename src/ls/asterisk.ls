@@ -28,14 +28,14 @@ casper = require('casper').create(
     self.exit!
   clientScripts:
     cwd + '/src/js/browser/TreeCrawler.js'
-    cwd + '/src/js/browser/DocumentOutliner.js'
+    cwd + '/src/js/browser/DocumentSummary.js'
 )
 
 /* validate task name */
-casper.die("There is no task called \"#{task}\"") if task.search(/^(outline)$/) is -1
+casper.die("There is no task called \"#{task}\"") if task.search(/^(summary)$/) is -1
 
 /* map the task option name to it's Class */
-task = 'DocumentOutliner' if task is 'outline'
+task = 'DocumentSummary' if task is 'summary'
 
 /* Visit the URL and perform the chosen task */
 casper.start url, ->
