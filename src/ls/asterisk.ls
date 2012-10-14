@@ -23,6 +23,8 @@ task = phantom.casperArgs.get('task')
 
 /* Create a Crawler which injects our tasks to any URL we process */
 casper = require('casper').create(
+  verbose: false
+  logLevel: 'error'
   onError: (self, message) ->
     console.error(message)
     self.exit!
