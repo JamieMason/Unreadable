@@ -18,30 +18,17 @@ class DocumentSummary extends TreeCrawler
     @output = []
 
   /**
-   * Does the String contain one or more spaces?
-   * @param  {String} x
-   * @return {Boolean}
-   * @static
-   */
-  @hasSpaces = (x) ->
-    x.indexOf(' ') isnt -1
-
-  /**
    * Return a list of the element's attributes and values
    * @param  {HTMLElement} el
    * @return {String[]}
    * @static
    */
   @outputAttrs = (el) ->
-    for attr in el.attributes
-      name = attr.name
-      value = attr.value
-      if value.length is 0
-        name
-      else
-        if @hasSpaces(value)
-          value = '"' + value + '"'
-        "#{name}=#{value}"
+    TreeCrawler.processAttrs(el, (name, value, isEmpty, hasSpaces) ->
+      if isEmpty then return name
+      if hasSpaces then value = "\"#{value}\""
+      "#{name}=#{value}"
+    )
 
   ELEMENT_NODE:
     /**

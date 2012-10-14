@@ -8,9 +8,7 @@
  */
 class TreeCrawler
 
-  /**
-   * @constructor
-   */
+  /** constructor */
   ->
     @reset()
 
@@ -62,6 +60,15 @@ class TreeCrawler
       process: ->
 
   /**
+   * Does the String contain one or more spaces?
+   * @param  {String} x
+   * @return {Boolean}
+   * @static
+   */
+  @hasSpaces = (x) ->
+    x.indexOf(' ') isnt -1
+
+  /**
    * Iterator method which routes each element in the document to the appropriate processor based on it's node type
    * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
    * @param  {HTMLElement}  el
@@ -84,3 +91,15 @@ class TreeCrawler
         @depth++
         TreeCrawler.processElement.call(@, child, iterator)
         @depth--
+
+  /**
+   * Map using iterator, el's attributes and values
+   * @param  {HTMLElement}  el
+   * @param  {Function}     iterator  params are name:String, value:String, isEmpty:Boolean, hasSpaces:Boolean
+   * @return {Array}
+   * @static
+   */
+  @processAttrs = (el, iterator) ->
+    for attr in el.attributes
+      value = attr.value
+      iterator(attr.name, value, value.length is 0, @hasSpaces(value))
