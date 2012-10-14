@@ -58,7 +58,8 @@ class TreeCrawler
        * @param  {String}       type     eg ELEMENT_NODE
        * @memberOf TreeCrawler.prototype
        */
-      process: ->
+      opening: ->
+      closing: ->
 
   /**
    * Does the String contain one or more spaces?
@@ -75,10 +76,10 @@ class TreeCrawler
    * @param  {HTMLElement}  el
    * @static
    */
-  @processNodeByType = !(crawler, el) ->
+  @processNodeByType = !(crawler, el, phase) ->
     lookup = crawler.nodeTypes
     typeName = lookup[el.nodeType]
-    nodeType.process(crawler, el, typeName) if nodeType = crawler[typeName]
+    nodeType[phase](crawler, el, typeName) if nodeType = crawler[typeName]
 
   /**
    * Recursively apply the iterator to el, it's children and their descendents
@@ -88,11 +89,12 @@ class TreeCrawler
    */
   @processElement = !(el, iterator) ->
     for child in children = el.childNodes
-      iterator(@, child)
+      iterator(@, child, 'opening')
       if child.childNodes.length
         @depth++
         TreeCrawler.processElement.call(@, child, iterator)
         @depth--
+      iterator(@, child, 'closing')
 
   /**
    * Map using iterator, el's attributes and values

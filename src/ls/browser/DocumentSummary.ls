@@ -34,12 +34,14 @@ class DocumentSummary extends TreeCrawler
     /**
      * Return a more legible summary of the HTML document
      * @return {String}
-     * @see TreeCrawler.prototype#process
+     * @see TreeCrawler.prototype#opening
      * @memberOf DocumentSummary.prototype
      */
-    process: (crawler, el) ->
+    opening: (crawler, el) ->
       indentation = ' ' * (crawler.depth * 2)
       element = el.nodeName.toLowerCase!
       attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
       crawler.output.push("#{indentation}#{element}#{attrs}\n")
+
+    closing: ->
