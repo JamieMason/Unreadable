@@ -1,20 +1,42 @@
+/**
+ * @fileOverview
+ * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
+ */
+
+/**
+ * @class TreeCrawler
+ */
 class TreeCrawler
 
-  # Constructor
-  # --------------------------------------------------
+  /**
+   * @constructor
+   */
   ->
     @reset()
 
-  # Prototype
-  # --------------------------------------------------
+  /**
+   * Restore the crawler's default state
+   * @memberOf TreeCrawler.prototype
+   */
   reset: ->
     @depth = 0
     @output = null
 
+  /**
+   * Start crawling the document
+   * @param  {HTMLElement} [el=document.documentElement]
+   * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
+   * @memberOf TreeCrawler.prototype
+   */
   crawl: !(el = document.documentElement, iterator = TreeCrawler.processNodeByType) ->
     @reset()
-    TreeCrawler.each.call(@, el, iterator)
+    TreeCrawler.processElement.call(@, el, iterator)
 
+  /**
+   * Lookup table of node types to node type names
+   * @type {Object}
+   * @memberOf TreeCrawler.prototype
+   */
   nodeTypes:
     '1'  : 'ELEMENT_NODE'
     '2'  : 'ATTRIBUTE_NODE'
@@ -29,23 +51,36 @@ class TreeCrawler
     '11' : 'DOCUMENT_FRAGMENT_NODE'
     '12' : 'NOTATION_NODE'
 
-  # create default no-op processors
   for type, name of prototype.nodeTypes
     prototype[name] =
+      /**
+       * Default no-op element processors at TreeCrawler.prototype.ELEMENT_NODE intended to be overridden
+       * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
+       * @param  {HTMLElement}  el
+       * @memberOf TreeCrawler.prototype
+       */
       process: ->
 
-  # Statics
-  # --------------------------------------------------
+  /**
+   * Iterator method which routes each element in the document to the appropriate processor based on it's node type
+   * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
+   * @param  {HTMLElement}  el
+   * @static
+   */
   @processNodeByType = !(crawler, el) ->
     nodeTypes = crawler.nodeTypes
     nodeType.process(crawler, el) if nodeType = crawler[crawler.nodeTypes[el.nodeType]]
 
-  @each = !(el, iterator) ->
+  /**
+   * Recursively apply the iterator to el, it's children and their descendents
+   * @param  {HTMLElement}  el
+   * @param  {Function}     iterator
+   * @static
+   */
+  @processElement = !(el, iterator) ->
     for child in children = el.childNodes
       iterator(@, child)
       if child.childNodes.length
         @depth++
-        TreeCrawler.each.call(@, child, iterator)
+        TreeCrawler.processElement.call(@, child, iterator)
         @depth--
-
-window.TreeCrawler = TreeCrawler
