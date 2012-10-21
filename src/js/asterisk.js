@@ -44,15 +44,15 @@ if (task === 'minify') {
 }
 /* Visit the URL and perform the chosen task */
 casper.start(url, function(){
-  var elements;
-  elements = this.evaluate(function(taskName){
+  var output;
+  output = this.evaluate(function(taskName){
     var iterator;
     iterator = new window[taskName]();
     iterator.crawl();
-    return iterator.output.join('');
+    return iterator.output;
   }, {
     taskName: task
   });
-  return this.echo(elements);
+  return this.echo(output);
 });
 casper.run();

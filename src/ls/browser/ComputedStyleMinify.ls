@@ -15,7 +15,14 @@ class ComputedStyleMinify extends TreeCrawler
    */
   reset: ->
     super!
-    @output = [TreeCrawler.getDocType()]
+    @output =
+      html: [TreeCrawler.getDocType()]
+      iScripts: []
+      iStyles: []
+
+  crawl: ->
+    super!
+    @output = JSON.stringify(@output)
 
   /**
    * @param  {String}  textNodeValue
@@ -43,16 +50,21 @@ class ComputedStyleMinify extends TreeCrawler
 
   ELEMENT_NODE: new ElementProcessor(
     opening: (crawler, el) ->
-      element = el.nodeName.toLowerCase!
+      nodeName = el.nodeName.toLowerCase!
       attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
-      crawler.output.push("<#{element}#{attrs}>")
+      crawler.output.html.push("<#{nodeName}#{attrs}>")
+      # store the line number of the text content of this inline style block
+      if nodeName === 'style'
+        then crawler.output.iStyles.push(crawler.output.html.length)
+      else if nodeName is 'script' and (!el.type or el.type is 'text/javascript') and el.firstChild and el.firstChild.nodeValue
+        then crawler.output.iScripts.push(crawler.output.html.length)
 
     closing: (crawler, el) ->
-      element = el.nodeName.toLowerCase!
+      nodeName = el.nodeName.toLowerCase!
       # if closing tag is not optional or forbidden
-      if element.search(/^(body|colgroup|dd|dt|head|html|li|option|p|tbody|td|tfoot|th|thead|tr)$/) is -1 and element.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
-        crawler.output.push("</#{element}>")
+      if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|p|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
+        crawler.output.html.push("</#{nodeName}>")
   )
 
   # DOCUMENT_NODE: prototype.ELEMENT_NODE
@@ -62,5 +74,5 @@ class ComputedStyleMinify extends TreeCrawler
       value = el.nodeValue
       value = value.replace(/^\s+/, if ComputedStyleMinify.isInlineElement(el.previousSibling) then ' ' else '')
       value = value.replace(/\s+$/, if ComputedStyleMinify.isInlineElement(el.nextSibling) then ' ' else '')
-      crawler.output.push(value)
+      crawler.output.html.push(value)
   )

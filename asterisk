@@ -1,44 +1,43 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-usage() {
-cat << EOF
-usage: $0 options
+var program = require('commander');
+var cleanCSS = require('clean-css');
+var uglifyJs = require('uglify-js');
+var uglifyParser = uglifyJs.parser;
+var uglifyProcessor = uglifyJs.uglify;
+var exec = require('child_process').exec;
+var casperCommand;
+var proc;
+var output;
 
-Applies a named task to be performed on a web page.
+program
+  .version('0.0.1')
+  .option('-h --help', 'Show this message')
+  .option('-u --url [value]', 'URL to process')
+  .option('-t --task [value]', 'Task name to perform')
+  .parse(process.argv);
 
-OPTIONS:
-  -h    Show this message
-  -u    URL to process
-  -t    Task name to perform
-EOF
-}
+casperCommand = 'casperjs "' + __dirname + '/src/js/asterisk.js" --cwd="' + __dirname + '" --url="' + program.url + '" --task="' + program.task + '"';
 
-URL=
-TASK=
-while getopts "hu:t:" OPTION
-do
-  case $OPTION in
-    h)
-      usage
-      exit 1
-      ;;
-    u)
-      URL=$OPTARG
-      ;;
-    t)
-      TASK=$OPTARG
-      ;;
-    ?)
-      usage
-      exit
-      ;;
-  esac
-done
+proc = exec(casperCommand, function(error, stdout, stderr) {
 
-if [[ -z $URL ]] || [[ -z $TASK ]]
-then
-  usage
-  exit 1
-fi
+  if(error !== null) {
+    throw new Error(error);
+  }
 
-casperjs "${PWD}/src/js/asterisk.js" --cwd=$PWD --url=$URL --task=$TASK
+  var output = JSON.parse(stdout);
+
+  output.iStyles.forEach(function(lineNumber){
+    output.html[lineNumber] = cleanCSS.process(output.html[lineNumber]);
+  });
+
+  output.iScripts.forEach(function(lineNumber){
+    var ast = uglifyParser.parse(output.html[lineNumber]); // parse code and get the initial AST
+    ast = uglifyProcessor.ast_mangle(ast); // get a new AST with mangled names
+    ast = uglifyProcessor.ast_squeeze(ast); // get an AST with compression optimizations
+    output.html[lineNumber] = uglifyProcessor.gen_code(ast);
+  });
+
+  console.log(output.html.join(''));
+
+});

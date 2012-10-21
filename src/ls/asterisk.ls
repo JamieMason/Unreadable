@@ -47,13 +47,13 @@ task = 'ComputedStyleMinify' if task is 'minify'
 
 /* Visit the URL and perform the chosen task */
 casper.start url, ->
-  elements = @evaluate((taskName) ->
+  output = @evaluate((taskName) ->
     iterator = new window[taskName]!
     iterator.crawl!
-    iterator.output.join ''
+    iterator.output
   ,
     taskName: task
   )
-  @echo elements
+  @echo output
 
 casper.run!
