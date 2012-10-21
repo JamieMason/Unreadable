@@ -4,6 +4,18 @@
  */
 /**
  * @class TreeCrawler
+ * @property {Object} ELEMENT_NODE
+ * @property {Object} ATTRIBUTE_NODE
+ * @property {Object} TEXT_NODE
+ * @property {Object} CDATA_SECTION_NODE
+ * @property {Object} ENTITY_REFERENCE_NODE
+ * @property {Object} ENTITY_NODE
+ * @property {Object} PROCESSING_INSTRUCTION_NODE
+ * @property {Object} COMMENT_NODE
+ * @property {Object} DOCUMENT_NODE
+ * @property {Object} DOCUMENT_TYPE_NODE
+ * @property {Object} DOCUMENT_FRAGMENT_NODE
+ * @property {Object} NOTATION_NODE
  */
 var TreeCrawler;
 TreeCrawler = (function(){
@@ -15,7 +27,7 @@ TreeCrawler = (function(){
   }
   /**
    * Restore the crawler's default state
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
   prototype.reset = function(){
     this.depth = 0;
@@ -25,7 +37,7 @@ TreeCrawler = (function(){
    * Start crawling the document
    * @param  {HTMLElement} [el=document.documentElement]
    * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
   prototype.crawl = function(el, iterator){
     el == null && (el = document.documentElement);
@@ -36,9 +48,9 @@ TreeCrawler = (function(){
   /**
    * Lookup table of node types to node type names
    * @type {Object}
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
-  prototype.nodeTypes = {
+  prototype.NODE_TYPES = {
     '1': 'ELEMENT_NODE',
     '2': 'ATTRIBUTE_NODE',
     '3': 'TEXT_NODE',
@@ -52,20 +64,21 @@ TreeCrawler = (function(){
     '11': 'DOCUMENT_FRAGMENT_NODE',
     '12': 'NOTATION_NODE'
   };
-  for (type in ref$ = prototype.nodeTypes) {
+  for (type in ref$ = prototype.NODE_TYPES) {
     name = ref$[type];
-    prototype[name] = {
-      /**
-       * Default no-op element processors at TreeCrawler.prototype.ELEMENT_NODE intended to be overridden
-       * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
-       * @param  {HTMLElement}  el
-       * @param  {String}       type     eg ELEMENT_NODE
-       * @memberOf TreeCrawler.prototype
-       */
-      opening: fn$,
-      closing: fn1$
-    };
+    prototype[name] = new ElementProcessor();
   }
+  TreeCrawler.getDocType = function(){
+    var node, extra;
+    node = document.doctype || {
+      name: 'html'
+    };
+    extra = '';
+    extra += node.publicId ? " PUBLIC " + node.publicId : '';
+    extra += !node.publicId && node.systemId ? ' SYSTEM' : '';
+    extra += node.systemId ? " " + node.systemId : '';
+    return ("<!DOCTYPE " + node.name) + extra + '>\n';
+  };
   /**
    * Does the String contain one or more spaces?
    * @param  {String} x
@@ -83,7 +96,7 @@ TreeCrawler = (function(){
    */
   TreeCrawler.processNodeByType = function(crawler, el, phase){
     var lookup, typeName, nodeType;
-    lookup = crawler.nodeTypes;
+    lookup = crawler.NODE_TYPES;
     typeName = lookup[el.nodeType];
     if (nodeType = crawler[typeName]) {
       nodeType[phase](crawler, el, typeName);
@@ -97,16 +110,16 @@ TreeCrawler = (function(){
    */
   TreeCrawler.processElement = function(el, iterator){
     var i$, ref$, children, len$, child;
-    for (i$ = 0, len$ = (ref$ = children = el.childNodes).length; i$ < len$; ++i$) {
-      child = ref$[i$];
-      iterator(this, child, 'opening');
-      if (child.childNodes.length) {
-        this.depth++;
+    iterator(this, el, 'opening');
+    if (el.childNodes.length) {
+      this.depth++;
+      for (i$ = 0, len$ = (ref$ = children = el.childNodes).length; i$ < len$; ++i$) {
+        child = ref$[i$];
         TreeCrawler.processElement.call(this, child, iterator);
-        this.depth--;
       }
-      iterator(this, child, 'closing');
+      this.depth--;
     }
+    iterator(this, el, 'closing');
   };
   /**
    * Map using iterator, el's attributes and values
@@ -125,6 +138,4 @@ TreeCrawler = (function(){
     return results$;
   };
   return TreeCrawler;
-  function fn$(){}
-  function fn1$(){}
 }());

@@ -29,7 +29,7 @@ casper = require('casper').create({
     console.error(message);
     return self.exit();
   },
-  clientScripts: [cwd + '/src/js/browser/TreeCrawler.js', cwd + '/src/js/browser/DocumentSummary.js', cwd + '/src/js/browser/NaiveMinify.js']
+  clientScripts: [cwd + '/src/js/browser/ElementProcessor.js', cwd + '/src/js/browser/TreeCrawler.js', cwd + '/src/js/browser/DocumentSummary.js', cwd + '/src/js/browser/ComputedStyleMinify.js']
 });
 /* validate task name */
 if (task.search(/^(summary|minify)$/) === -1) {
@@ -40,7 +40,7 @@ if (task === 'summary') {
   task = 'DocumentSummary';
 }
 if (task === 'minify') {
-  task = 'NaiveMinify';
+  task = 'ComputedStyleMinify';
 }
 /* Visit the URL and perform the chosen task */
 casper.start(url, function(){

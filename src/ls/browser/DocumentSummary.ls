@@ -10,8 +10,8 @@
 class DocumentSummary extends TreeCrawler
 
   /**
-   * @see TreeCrawler#reset
-   * @memberOf DocumentSummary.prototype
+   * @see TreeCrawler.reset
+   * @memberOf DocumentSummary
    */
   reset: ->
     super!
@@ -30,18 +30,11 @@ class DocumentSummary extends TreeCrawler
       "#{name}=#{value}"
     )
 
-  ELEMENT_NODE:
-    /**
-     * Return a more legible summary of the HTML document
-     * @return {String}
-     * @see TreeCrawler.prototype#opening
-     * @memberOf DocumentSummary.prototype
-     */
+  ELEMENT_NODE: new ElementProcessor(
     opening: (crawler, el) ->
       indentation = ' ' * (crawler.depth * 2)
       element = el.nodeName.toLowerCase!
       attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
       crawler.output.push("#{indentation}#{element}#{attrs}\n")
-
-    closing: ->
+  )

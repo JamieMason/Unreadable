@@ -10,8 +10,8 @@ var DocumentSummary;
 DocumentSummary = (function(superclass){
   var prototype = extend$((import$(DocumentSummary, superclass).displayName = 'DocumentSummary', DocumentSummary), superclass).prototype, constructor = DocumentSummary;
   /**
-   * @see TreeCrawler#reset
-   * @memberOf DocumentSummary.prototype
+   * @see TreeCrawler.reset
+   * @memberOf DocumentSummary
    */
   prototype.reset = function(){
     superclass.prototype.reset.call(this);
@@ -34,13 +34,7 @@ DocumentSummary = (function(superclass){
       return name + "=" + value;
     });
   };
-  prototype.ELEMENT_NODE = {
-    /**
-     * Return a more legible summary of the HTML document
-     * @return {String}
-     * @see TreeCrawler.prototype#opening
-     * @memberOf DocumentSummary.prototype
-     */
+  prototype.ELEMENT_NODE = new ElementProcessor({
     opening: function(crawler, el){
       var indentation, element, attrs;
       indentation = repeatString$(' ', crawler.depth * 2);
@@ -48,9 +42,8 @@ DocumentSummary = (function(superclass){
       attrs = DocumentSummary.outputAttrs(el);
       attrs = attrs.length !== 0 ? ' ' + attrs.join(' ') : '';
       return crawler.output.push(indentation + "" + element + attrs + "\n");
-    },
-    closing: function(){}
-  };
+    }
+  });
   function DocumentSummary(){
     superclass.apply(this, arguments);
   }

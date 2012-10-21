@@ -5,6 +5,18 @@
 
 /**
  * @class TreeCrawler
+ * @property {Object} ELEMENT_NODE
+ * @property {Object} ATTRIBUTE_NODE
+ * @property {Object} TEXT_NODE
+ * @property {Object} CDATA_SECTION_NODE
+ * @property {Object} ENTITY_REFERENCE_NODE
+ * @property {Object} ENTITY_NODE
+ * @property {Object} PROCESSING_INSTRUCTION_NODE
+ * @property {Object} COMMENT_NODE
+ * @property {Object} DOCUMENT_NODE
+ * @property {Object} DOCUMENT_TYPE_NODE
+ * @property {Object} DOCUMENT_FRAGMENT_NODE
+ * @property {Object} NOTATION_NODE
  */
 class TreeCrawler
 
@@ -14,7 +26,7 @@ class TreeCrawler
 
   /**
    * Restore the crawler's default state
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
   reset: ->
     @depth = 0
@@ -24,7 +36,7 @@ class TreeCrawler
    * Start crawling the document
    * @param  {HTMLElement} [el=document.documentElement]
    * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
   crawl: !(el = document.documentElement, iterator = TreeCrawler.processNodeByType) ->
     @reset()
@@ -33,9 +45,9 @@ class TreeCrawler
   /**
    * Lookup table of node types to node type names
    * @type {Object}
-   * @memberOf TreeCrawler.prototype
+   * @memberOf TreeCrawler
    */
-  nodeTypes:
+  NODE_TYPES:
     '1'  : 'ELEMENT_NODE'
     '2'  : 'ATTRIBUTE_NODE'
     '3'  : 'TEXT_NODE'
@@ -49,17 +61,16 @@ class TreeCrawler
     '11' : 'DOCUMENT_FRAGMENT_NODE'
     '12' : 'NOTATION_NODE'
 
-  for type, name of prototype.nodeTypes
-    prototype[name] =
-      /**
-       * Default no-op element processors at TreeCrawler.prototype.ELEMENT_NODE intended to be overridden
-       * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
-       * @param  {HTMLElement}  el
-       * @param  {String}       type     eg ELEMENT_NODE
-       * @memberOf TreeCrawler.prototype
-       */
-      opening: ->
-      closing: ->
+  for type, name of prototype.NODE_TYPES
+    prototype[name] = new ElementProcessor()
+
+  @getDocType = ->
+    node = document.doctype or name: 'html'
+    extra = ''
+    extra += (if node.publicId then " PUBLIC #{node.publicId}" else '')
+    extra += (if !node.publicId and node.systemId then ' SYSTEM' else '')
+    extra += (if node.systemId then " #{node.systemId}" else '')
+    "<!DOCTYPE #{node.name}" + extra + '>\n'
 
   /**
    * Does the String contain one or more spaces?
@@ -77,7 +88,7 @@ class TreeCrawler
    * @static
    */
   @processNodeByType = !(crawler, el, phase) ->
-    lookup = crawler.nodeTypes
+    lookup = crawler.NODE_TYPES
     typeName = lookup[el.nodeType]
     nodeType[phase](crawler, el, typeName) if nodeType = crawler[typeName]
 
@@ -88,13 +99,13 @@ class TreeCrawler
    * @static
    */
   @processElement = !(el, iterator) ->
-    for child in children = el.childNodes
-      iterator(@, child, 'opening')
-      if child.childNodes.length
-        @depth++
+    iterator(@, el, 'opening')
+    if el.childNodes.length
+      @depth++
+      for child in children = el.childNodes
         TreeCrawler.processElement.call(@, child, iterator)
-        @depth--
-      iterator(@, child, 'closing')
+      @depth--
+    iterator(@, el, 'closing')
 
   /**
    * Map using iterator, el's attributes and values

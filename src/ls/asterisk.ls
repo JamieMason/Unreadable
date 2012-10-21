@@ -32,9 +32,10 @@ casper = require('casper').create(
     console.error(message)
     self.exit!
   clientScripts:
+    cwd + '/src/js/browser/ElementProcessor.js'
     cwd + '/src/js/browser/TreeCrawler.js'
     cwd + '/src/js/browser/DocumentSummary.js'
-    cwd + '/src/js/browser/NaiveMinify.js'
+    cwd + '/src/js/browser/ComputedStyleMinify.js'
 )
 
 /* validate task name */
@@ -42,7 +43,7 @@ casper.die("There is no task called \"#{task}\"") if task.search(/^(summary|mini
 
 /* map the task option name to it's Class */
 task = 'DocumentSummary' if task is 'summary'
-task = 'NaiveMinify' if task is 'minify'
+task = 'ComputedStyleMinify' if task is 'minify'
 
 /* Visit the URL and perform the chosen task */
 casper.start url, ->
