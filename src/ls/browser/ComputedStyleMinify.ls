@@ -46,7 +46,12 @@ class ComputedStyleMinify extends TreeCrawler
     textNodeValue.slice(0, i + 1)
 
   @isInlineElement = (el) ->
-    el isnt null and window.getComputedStyle(el, null).getPropertyValue('display').indexOf('inline') isnt -1
+    if el is null
+      return false
+    computedStyle = window.getComputedStyle(el, null)
+    if !computedStyle
+      return false
+    computedStyle.getPropertyValue('display').indexOf('inline') isnt -1
 
   ELEMENT_NODE: new ElementProcessor(
     opening: (crawler, el) ->

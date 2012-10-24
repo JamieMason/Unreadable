@@ -48,7 +48,15 @@ ComputedStyleMinify = (function(superclass){
     return textNodeValue.slice(0, i + 1);
   };
   ComputedStyleMinify.isInlineElement = function(el){
-    return el !== null && window.getComputedStyle(el, null).getPropertyValue('display').indexOf('inline') !== -1;
+    var computedStyle;
+    if (el === null) {
+      return false;
+    }
+    computedStyle = window.getComputedStyle(el, null);
+    if (!computedStyle) {
+      return false;
+    }
+    return computedStyle.getPropertyValue('display').indexOf('inline') !== -1;
   };
   prototype.ELEMENT_NODE = new ElementProcessor({
     opening: function(crawler, el){
