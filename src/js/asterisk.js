@@ -67,7 +67,3 @@ page.open(url, function(status){
     });
   }, messagePrefix, exitMessage, task);
 });
-/**
- * @fileOverview This is the CasperJS Script called by the asterisk binary
- * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
- */
