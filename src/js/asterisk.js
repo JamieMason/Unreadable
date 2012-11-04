@@ -2,57 +2,72 @@
  * @fileOverview This is the CasperJS Script called by the asterisk binary
  * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
  */
+var system, cwd, url, task, messagePrefix, exitMessage, page;
+system = require('system');
 /**
  * The current working directory needs supplying currently, I can't find a way to locate it using Casper
  * @type {String}
  */
-var cwd, url, task, casper;
-cwd = phantom.casperArgs.get('cwd');
+cwd = system.args[1];
 /**
  * The web page to process
  * @type {String}
  */
-url = phantom.casperArgs.get('url') || 'about:blank';
+url = system.args[2] || 'about:blank';
 /**
  * The task to perform on the URL
  * @type {String}
  */
-task = phantom.casperArgs.get('task');
-/* Create a Crawler which injects our tasks to any URL we process */
-casper = require('casper').create({
-  verbose: false,
-  logLevel: 'error',
-  javascriptEnabled: false,
-  loadImages: false,
-  loadPlugins: false,
-  onError: function(self, message){
-    console.error(message);
-    return self.exit();
-  },
-  clientScripts: [cwd + '/src/js/browser/ElementProcessor.js', cwd + '/src/js/browser/TreeCrawler.js', cwd + '/src/js/browser/DocumentSummary.js', cwd + '/src/js/browser/ComputedStyleMinify.js']
-});
-/* validate task name */
-if (task.search(/^(summary|minify)$/) === -1) {
-  casper.die("There is no task called \"" + task + "\"");
-}
-/* map the task option name to it's Class */
+task = system.args[3];
+messagePrefix = '[ASTERISK]';
+exitMessage = messagePrefix + " END";
 if (task === 'summary') {
   task = 'DocumentSummary';
 }
 if (task === 'minify') {
   task = 'ComputedStyleMinify';
 }
-/* Visit the URL and perform the chosen task */
-casper.start(url, function(){
-  var output;
-  output = this.evaluate(function(taskName){
+page = require('webpage').create();
+page.onConsoleMessage = function(msg){
+  if (msg === exitMessage) {
+    return phantom.exit();
+  } else if (~msg.indexOf(messagePrefix)) {
+    return console.log(msg.replace(messagePrefix, ''));
+  }
+};
+page.onError = function(msg, trace){
+  var msgStack;
+  msgStack = ['ERROR: ' + msg];
+  if (trace) {
+    msgStack.push('TRACE:');
+    trace.forEach(function(t){
+      var ref$;
+      return msgStack.push(' -> ' + t.file + ': ' + t.line + ((ref$ = t['function']) != null
+        ? ref$
+        : ' (in function "' + t['function'] + {
+          '")': ''
+        }));
+    });
+  }
+  console.error(msgStack.join('\n'));
+  return phantom.exit();
+};
+page.open(url, function(status){
+  page.injectJs('browser/ElementProcessor.js');
+  page.injectJs('browser/TreeCrawler.js');
+  page.injectJs('browser/DocumentSummary.js');
+  page.injectJs('browser/ComputedStyleMinify.js');
+  page.injectJs('browser/ajax.js');
+  return page.evaluate(function(messagePrefix, exitMessage, taskName){
     var iterator;
     iterator = new window[taskName]();
-    iterator.crawl();
-    return iterator.output;
-  }, {
-    taskName: task
-  });
-  return this.echo(output);
+    return iterator.crawl(function(output){
+      console.log(messagePrefix, output);
+      return console.log(exitMessage);
+    });
+  }, messagePrefix, exitMessage, task);
 });
-casper.run();
+/**
+ * @fileOverview This is the CasperJS Script called by the asterisk binary
+ * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
+ */

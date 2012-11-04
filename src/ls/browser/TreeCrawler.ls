@@ -20,15 +20,11 @@
  */
 class TreeCrawler
 
-  /** constructor */
-  ->
-    @reset()
-
   /**
    * Restore the crawler's default state
    * @memberOf TreeCrawler
    */
-  reset: ->
+  reset: (doc) ->
     @depth = 0
     @output = null
 
@@ -38,9 +34,10 @@ class TreeCrawler
    * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
    * @memberOf TreeCrawler
    */
-  crawl: !(el = document.documentElement, iterator = TreeCrawler.processNodeByType) ->
-    @reset()
-    TreeCrawler.processElement.call(@, el, iterator)
+  crawl: !(done, doc = document, iterator = TreeCrawler.processNodeByType) ->
+    @reset(doc)
+    TreeCrawler.processElement.call(@, doc.documentElement, iterator)
+    done(@output)
 
   /**
    * Lookup table of node types to node type names
@@ -64,13 +61,28 @@ class TreeCrawler
   for type, name of prototype.NODE_TYPES
     prototype[name] = new ElementProcessor()
 
-  @getDocType = ->
-    node = document.doctype or name: 'html'
+  @getDocType = (doc) ->
+    node = doc.doctype or name: 'html'
     extra = ''
     extra += (if node.publicId then " PUBLIC #{node.publicId}" else '')
     extra += (if !node.publicId and node.systemId then ' SYSTEM' else '')
     extra += (if node.systemId then " #{node.systemId}" else '')
-    "<!DOCTYPE #{node.name}" + extra + '>\n'
+    "<!DOCTYPE #{node.name}" + extra + '>'
+
+  @getNonJsMarkup = (done) ->
+    xhr = new XMLHttpRequest!
+
+    xhr.onload = (e) ->
+      doc = document.implementation.createHTMLDocument('no-js')
+      doc.documentElement.innerHTML = this.responseText
+      Array.prototype.slice.call(doc.querySelectorAll('script:not([type]),script[type="text/javascript"]')).forEach((el) ->
+        el.setAttribute('type', 'asterisk/ignore')
+      )
+      done(doc)
+
+    xhr.open('GET', window.location.href)
+    xhr.responseType = 'text'
+    xhr.send()
 
   /**
    * Does the String contain one or more spaces?

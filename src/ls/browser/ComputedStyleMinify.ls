@@ -13,16 +13,26 @@ class ComputedStyleMinify extends TreeCrawler
    * @extends TreeCrawler.reset
    * @memberOf ComputedStyleMinify
    */
-  reset: ->
+  reset: (doc) ->
     super!
     @output =
-      html: [TreeCrawler.getDocType()]
+      html: [TreeCrawler.getDocType(doc) + '\n']
       iScripts: []
       iStyles: []
 
-  crawl: ->
-    super!
-    @output = JSON.stringify(@output)
+  crawl: (done) ->
+    _self = @;
+    _super = super
+
+    TreeCrawler.getNonJsMarkup((doc) ->
+      document.head = doc.head
+      document.body = doc.body
+
+      _super.call(_self, (output) ->
+        _self.output = JSON.stringify(output)
+        done(_self.output)
+      )
+    )
 
   /**
    * @param  {String}  textNodeValue
@@ -58,12 +68,13 @@ class ComputedStyleMinify extends TreeCrawler
       nodeName = el.nodeName.toLowerCase!
       attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
-      crawler.output.html.push("<#{nodeName}#{attrs}>")
       # store the line number of the text content of this inline style block
       if nodeName === 'style'
-        then crawler.output.iStyles.push(crawler.output.html.length)
-      else if nodeName is 'script' and (!el.type or el.type is 'text/javascript') and el.firstChild and el.firstChild.nodeValue
-        then crawler.output.iScripts.push(crawler.output.html.length)
+        crawler.output.iStyles.push(crawler.output.html.length + 1)
+      else if nodeName is 'script' and el.type is 'asterisk/ignore' and el.firstChild and el.firstChild.nodeValue
+        crawler.output.iScripts.push(crawler.output.html.length + 1)
+        attrs = attrs.replace(' type=asterisk/ignore', '')
+      crawler.output.html.push("<#{nodeName}#{attrs}>")
 
     closing: (crawler, el) ->
       nodeName = el.nodeName.toLowerCase!
@@ -71,8 +82,6 @@ class ComputedStyleMinify extends TreeCrawler
       if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|p|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
         crawler.output.html.push("</#{nodeName}>")
   )
-
-  # DOCUMENT_NODE: prototype.ELEMENT_NODE
 
   TEXT_NODE: new ElementProcessor(
     opening: (crawler, el) ->

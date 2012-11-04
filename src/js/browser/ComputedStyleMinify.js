@@ -13,17 +13,26 @@ ComputedStyleMinify = (function(superclass){
    * @extends TreeCrawler.reset
    * @memberOf ComputedStyleMinify
    */
-  prototype.reset = function(){
+  prototype.reset = function(doc){
     superclass.prototype.reset.call(this);
     return this.output = {
-      html: [TreeCrawler.getDocType()],
+      html: [TreeCrawler.getDocType(doc) + '\n'],
       iScripts: [],
       iStyles: []
     };
   };
-  prototype.crawl = function(){
-    superclass.prototype.crawl.call(this);
-    return this.output = JSON.stringify(this.output);
+  prototype.crawl = function(done){
+    var _self, _super;
+    _self = this;
+    _super = superclass.prototype.crawl;
+    return TreeCrawler.getNonJsMarkup(function(doc){
+      document.head = doc.head;
+      document.body = doc.body;
+      return _super.call(_self, function(output){
+        _self.output = JSON.stringify(output);
+        return done(_self.output);
+      });
+    });
   };
   /**
    * @param  {String}  textNodeValue
@@ -64,12 +73,13 @@ ComputedStyleMinify = (function(superclass){
       nodeName = el.nodeName.toLowerCase();
       attrs = DocumentSummary.outputAttrs(el);
       attrs = attrs.length !== 0 ? ' ' + attrs.join(' ') : '';
-      crawler.output.html.push("<" + nodeName + attrs + ">");
       if (deepEq$(nodeName, 'style', '===')) {
-        return crawler.output.iStyles.push(crawler.output.html.length);
-      } else if (nodeName === 'script' && (!el.type || el.type === 'text/javascript') && el.firstChild && el.firstChild.nodeValue) {
-        return crawler.output.iScripts.push(crawler.output.html.length);
+        crawler.output.iStyles.push(crawler.output.html.length + 1);
+      } else if (nodeName === 'script' && el.type === 'asterisk/ignore' && el.firstChild && el.firstChild.nodeValue) {
+        crawler.output.iScripts.push(crawler.output.html.length + 1);
+        attrs = attrs.replace(' type=asterisk/ignore', '');
       }
+      return crawler.output.html.push("<" + nodeName + attrs + ">");
     },
     closing: function(crawler, el){
       var nodeName;

@@ -19,17 +19,13 @@
  */
 var TreeCrawler;
 TreeCrawler = (function(){
-  /** constructor */
   TreeCrawler.displayName = 'TreeCrawler';
   var type, ref$, name, prototype = TreeCrawler.prototype, constructor = TreeCrawler;
-  function TreeCrawler(){
-    this.reset();
-  }
   /**
    * Restore the crawler's default state
    * @memberOf TreeCrawler
    */
-  prototype.reset = function(){
+  prototype.reset = function(doc){
     this.depth = 0;
     return this.output = null;
   };
@@ -39,11 +35,12 @@ TreeCrawler = (function(){
    * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
    * @memberOf TreeCrawler
    */
-  prototype.crawl = function(el, iterator){
-    el == null && (el = document.documentElement);
+  prototype.crawl = function(done, doc, iterator){
+    doc == null && (doc = document);
     iterator == null && (iterator = TreeCrawler.processNodeByType);
-    this.reset();
-    TreeCrawler.processElement.call(this, el, iterator);
+    this.reset(doc);
+    TreeCrawler.processElement.call(this, doc.documentElement, iterator);
+    done(this.output);
   };
   /**
    * Lookup table of node types to node type names
@@ -68,16 +65,32 @@ TreeCrawler = (function(){
     name = ref$[type];
     prototype[name] = new ElementProcessor();
   }
-  TreeCrawler.getDocType = function(){
+  TreeCrawler.getDocType = function(doc){
     var node, extra;
-    node = document.doctype || {
+    node = doc.doctype || {
       name: 'html'
     };
     extra = '';
     extra += node.publicId ? " PUBLIC " + node.publicId : '';
     extra += !node.publicId && node.systemId ? ' SYSTEM' : '';
     extra += node.systemId ? " " + node.systemId : '';
-    return ("<!DOCTYPE " + node.name) + extra + '>\n';
+    return ("<!DOCTYPE " + node.name) + extra + '>';
+  };
+  TreeCrawler.getNonJsMarkup = function(done){
+    var xhr;
+    xhr = new XMLHttpRequest();
+    xhr.onload = function(e){
+      var doc;
+      doc = document.implementation.createHTMLDocument('no-js');
+      doc.documentElement.innerHTML = this.responseText;
+      Array.prototype.slice.call(doc.querySelectorAll('script:not([type]),script[type="text/javascript"]')).forEach(function(el){
+        return el.setAttribute('type', 'asterisk/ignore');
+      });
+      return done(doc);
+    };
+    xhr.open('GET', window.location.href);
+    xhr.responseType = 'text';
+    return xhr.send();
   };
   /**
    * Does the String contain one or more spaces?
@@ -137,5 +150,6 @@ TreeCrawler = (function(){
     }
     return results$;
   };
+  function TreeCrawler(){}
   return TreeCrawler;
 }());

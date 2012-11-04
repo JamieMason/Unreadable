@@ -2,9 +2,7 @@
 
 var program = require('commander');
 var cleanCSS = require('clean-css');
-var uglifyJs = require('uglify-js');
-var uglifyParser = uglifyJs.parser;
-var uglifyProcessor = uglifyJs.uglify;
+var uglify = require('uglify-js');
 var exec = require('child_process').exec;
 var casperCommand;
 var proc;
@@ -17,25 +15,36 @@ program
   .option('-t --task [value]', 'Task name to perform')
   .parse(process.argv);
 
-casperCommand = 'casperjs "' + __dirname + '/src/js/asterisk.js" --cwd="' + __dirname + '" --url="' + program.url + '" --task="' + program.task + '"';
+casperCommand = 'phantomjs "' + __dirname + '/src/js/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + program.task + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
 
 proc = exec(casperCommand, function(error, stdout, stderr) {
 
   if(error !== null) {
-    throw new Error(error);
+    return console.error(error);
   }
 
+  // console.log(stdout); return;
+
   var output = JSON.parse(stdout);
+
+  if(output === null) {
+    return console.error('null output');
+  }
+
+  function minifyJs(data) {
+    var ast = uglify.parser.parse(data);
+    ast = uglify.uglify.ast_mangle(ast);
+    ast = uglify.uglify.ast_squeeze(ast);
+    data = uglify.uglify.gen_code(ast);
+    return data;
+  }
 
   output.iStyles.forEach(function(lineNumber){
     output.html[lineNumber] = cleanCSS.process(output.html[lineNumber]);
   });
 
   output.iScripts.forEach(function(lineNumber){
-    var ast = uglifyParser.parse(output.html[lineNumber]); // parse code and get the initial AST
-    ast = uglifyProcessor.ast_mangle(ast); // get a new AST with mangled names
-    ast = uglifyProcessor.ast_squeeze(ast); // get an AST with compression optimizations
-    output.html[lineNumber] = uglifyProcessor.gen_code(ast);
+    output.html[lineNumber] = minifyJs(output.html[lineNumber]);
   });
 
   console.log(output.html.join(''));
