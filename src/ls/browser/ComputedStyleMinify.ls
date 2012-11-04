@@ -91,14 +91,15 @@ class ComputedStyleMinify extends TreeCrawler
     closing: (crawler, el) ->
       nodeName = el.nodeName.toLowerCase!
       # if closing tag is not optional or forbidden
-      if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
-        crawler.output.html.push("</#{nodeName}>")
+      # if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
+      #   crawler.output.html.push("</#{nodeName}>")
+      crawler.output.html.push("</#{nodeName}>")
   )
 
   TEXT_NODE: new ElementProcessor(
     opening: (crawler, el) ->
       value = el.nodeValue
-      value = value.replace(/^\s+/, if ComputedStyleMinify.isInlineElement(el.previousSibling) then ' ' else '')
-      value = value.replace(/\s+$/, if ComputedStyleMinify.isInlineElement(el.nextSibling) then ' ' else '')
+      if value.search(/[^ ]/) isnt -1
+        value = value.replace(/^\s+/, if ComputedStyleMinify.isInlineElement(el.previousSibling) then ' ' else '')
       crawler.output.html.push(value)
   )

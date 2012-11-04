@@ -93,17 +93,16 @@ ComputedStyleMinify = (function(superclass){
     closing: function(crawler, el){
       var nodeName;
       nodeName = el.nodeName.toLowerCase();
-      if (nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) === -1 && nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) === -1) {
-        return crawler.output.html.push("</" + nodeName + ">");
-      }
+      return crawler.output.html.push("</" + nodeName + ">");
     }
   });
   prototype.TEXT_NODE = new ElementProcessor({
     opening: function(crawler, el){
       var value;
       value = el.nodeValue;
-      value = value.replace(/^\s+/, ComputedStyleMinify.isInlineElement(el.previousSibling) ? ' ' : '');
-      value = value.replace(/\s+$/, ComputedStyleMinify.isInlineElement(el.nextSibling) ? ' ' : '');
+      if (value.search(/[^ ]/) !== -1) {
+        value = value.replace(/^\s+/, ComputedStyleMinify.isInlineElement(el.previousSibling) ? ' ' : '');
+      }
       return crawler.output.html.push(value);
     }
   });
