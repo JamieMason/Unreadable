@@ -19,14 +19,20 @@ class ComputedStyleMinify extends TreeCrawler
       html: [TreeCrawler.getDocType(doc) + '\n']
       iScripts: []
       iStyles: []
+      logs: []
 
   crawl: (done) ->
     _self = @;
     _super = super
 
     TreeCrawler.getNonJsMarkup((doc) ->
-      document.head = doc.head
-      document.body = doc.body
+      oldHead = document.getElementsByTagName('head')[0]
+      newHead = doc.getElementsByTagName('head')[0]
+      oldBody = document.getElementsByTagName('body')[0]
+      newBody = doc.getElementsByTagName('body')[0]
+
+      oldHead.parentNode.replaceChild(newHead, oldHead)
+      oldBody.parentNode.replaceChild(newBody, oldBody)
 
       _super.call(_self, (output) ->
         _self.output = JSON.stringify(output)
@@ -68,18 +74,24 @@ class ComputedStyleMinify extends TreeCrawler
       nodeName = el.nodeName.toLowerCase!
       attrs = DocumentSummary.outputAttrs(el)
       attrs = if attrs.length isnt 0 then ' ' + attrs.join(' ') else ''
-      # store the line number of the text content of this inline style block
-      if nodeName === 'style'
+
+      if nodeName is 'style'
         crawler.output.iStyles.push(crawler.output.html.length + 1)
-      else if nodeName is 'script' and el.type is 'asterisk/ignore' and el.firstChild and el.firstChild.nodeValue
-        crawler.output.iScripts.push(crawler.output.html.length + 1)
+
+      # @FIXME scripts in the head are not having their @types processed correctly
+      else if nodeName is 'script' and el.type is 'asterisk/ignore' or el.type is 'text/javascript'
         attrs = attrs.replace(' type=asterisk/ignore', '')
+        attrs = attrs.replace(' type=text/javascript', '')
+
+        if el.firstChild and el.firstChild.nodeValue
+          crawler.output.iScripts.push(crawler.output.html.length + 1)
+
       crawler.output.html.push("<#{nodeName}#{attrs}>")
 
     closing: (crawler, el) ->
       nodeName = el.nodeName.toLowerCase!
       # if closing tag is not optional or forbidden
-      if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|p|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
+      if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
         crawler.output.html.push("</#{nodeName}>")
   )
 

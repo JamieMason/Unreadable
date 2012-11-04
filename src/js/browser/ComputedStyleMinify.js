@@ -18,7 +18,8 @@ ComputedStyleMinify = (function(superclass){
     return this.output = {
       html: [TreeCrawler.getDocType(doc) + '\n'],
       iScripts: [],
-      iStyles: []
+      iStyles: [],
+      logs: []
     };
   };
   prototype.crawl = function(done){
@@ -26,8 +27,13 @@ ComputedStyleMinify = (function(superclass){
     _self = this;
     _super = superclass.prototype.crawl;
     return TreeCrawler.getNonJsMarkup(function(doc){
-      document.head = doc.head;
-      document.body = doc.body;
+      var oldHead, newHead, oldBody, newBody;
+      oldHead = document.getElementsByTagName('head')[0];
+      newHead = doc.getElementsByTagName('head')[0];
+      oldBody = document.getElementsByTagName('body')[0];
+      newBody = doc.getElementsByTagName('body')[0];
+      oldHead.parentNode.replaceChild(newHead, oldHead);
+      oldBody.parentNode.replaceChild(newBody, oldBody);
       return _super.call(_self, function(output){
         _self.output = JSON.stringify(output);
         return done(_self.output);
@@ -73,18 +79,21 @@ ComputedStyleMinify = (function(superclass){
       nodeName = el.nodeName.toLowerCase();
       attrs = DocumentSummary.outputAttrs(el);
       attrs = attrs.length !== 0 ? ' ' + attrs.join(' ') : '';
-      if (deepEq$(nodeName, 'style', '===')) {
+      if (nodeName === 'style') {
         crawler.output.iStyles.push(crawler.output.html.length + 1);
-      } else if (nodeName === 'script' && el.type === 'asterisk/ignore' && el.firstChild && el.firstChild.nodeValue) {
-        crawler.output.iScripts.push(crawler.output.html.length + 1);
+      } else if (nodeName === 'script' && el.type === 'asterisk/ignore' || el.type === 'text/javascript') {
         attrs = attrs.replace(' type=asterisk/ignore', '');
+        attrs = attrs.replace(' type=text/javascript', '');
+        if (el.firstChild && el.firstChild.nodeValue) {
+          crawler.output.iScripts.push(crawler.output.html.length + 1);
+        }
       }
       return crawler.output.html.push("<" + nodeName + attrs + ">");
     },
     closing: function(crawler, el){
       var nodeName;
       nodeName = el.nodeName.toLowerCase();
-      if (nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|p|tbody|td|tfoot|th|thead|tr)$/) === -1 && nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) === -1) {
+      if (nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) === -1 && nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) === -1) {
         return crawler.output.html.push("</" + nodeName + ">");
       }
     }
@@ -113,88 +122,4 @@ function import$(obj, src){
   var own = {}.hasOwnProperty;
   for (var key in src) if (own.call(src, key)) obj[key] = src[key];
   return obj;
-}
-function deepEq$(x, y, type){
-  var toString = {}.toString, hasOwnProperty = {}.hasOwnProperty,
-      has = function (obj, key) { return hasOwnProperty.call(obj, key); };
-  first = true;
-  return eq(x, y, []);
-  function eq(a, b, stack) {
-    var className, length, size, result, alength, blength, r, key, ref, sizeB;
-    if (a == null || b == null) { return a === b; }
-    if (a.__placeholder__ || b.__placeholder__) { return true; }
-    if (a === b) { return a !== 0 || 1 / a == 1 / b; }
-    className = toString.call(a);
-    if (toString.call(b) != className) { return false; }
-    switch (className) {
-      case '[object String]': return a == String(b);
-      case '[object Number]':
-        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
-      case '[object Date]':
-      case '[object Boolean]':
-        return +a == +b;
-      case '[object RegExp]':
-        return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
-    }
-    if (typeof a != 'object' || typeof b != 'object') { return false; }
-    length = stack.length;
-    while (length--) { if (stack[length] == a) { return true; } }
-    stack.push(a);
-    size = 0;
-    result = true;
-    if (className == '[object Array]') {
-      alength = a.length;
-      blength = b.length;
-      if (first) { 
-        switch (type) {
-        case '===': result = alength === blength; break;
-        case '<==': result = alength <= blength; break;
-        case '<<=': result = alength < blength; break;
-        }
-        size = alength;
-        first = false;
-      } else {
-        result = alength === blength;
-        size = alength;
-      }
-      if (result) {
-        while (size--) {
-          if (!(result = size in a == size in b && eq(a[size], b[size], stack))){ break; }
-        }
-      }
-    } else {
-      if ('constructor' in a != 'constructor' in b || a.constructor != b.constructor) {
-        return false;
-      }
-      for (key in a) {
-        if (has(a, key)) {
-          size++;
-          if (!(result = has(b, key) && eq(a[key], b[key], stack))) { break; }
-        }
-      }
-      if (result) {
-        sizeB = 0;
-        for (key in b) {
-          if (has(b, key)) { ++sizeB; }
-        }
-        if (first) {
-          if (type === '<<=') {
-            result = size < sizeB;
-          } else if (type === '<==') {
-            result = size <= sizeB
-          } else {
-            result = size === sizeB;
-          }
-        } else {
-          first = false;
-          result = size === sizeB;
-        }
-      }
-    }
-    stack.pop();
-    return result;
-  }
 }
