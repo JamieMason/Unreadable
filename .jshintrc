@@ -3,6 +3,7 @@
     "ActiveXObject",
     "afterEach",
     "beforeEach",
+    "Class",
     "console",
     "define",
     "describe",

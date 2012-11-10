@@ -2,6 +2,7 @@
  * @fileOverview
  * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
  */
+
 /**
  * @class TreeCrawler
  * @property {Object} ELEMENT_NODE
@@ -17,139 +18,192 @@
  * @property {Object} DOCUMENT_FRAGMENT_NODE
  * @property {Object} NOTATION_NODE
  */
-var TreeCrawler;
-TreeCrawler = (function(){
-  TreeCrawler.displayName = 'TreeCrawler';
-  var type, ref$, name, prototype = TreeCrawler.prototype, constructor = TreeCrawler;
-  /**
-   * Restore the crawler's default state
-   * @memberOf TreeCrawler
-   */
-  prototype.reset = function(doc){
-    this.depth = 0;
-    return this.output = null;
-  };
-  /**
-   * Start crawling the document
-   * @param  {HTMLElement} [el=document.documentElement]
-   * @param  {Function}    [iterator=TreeCrawler.processNodeByType]
-   * @memberOf TreeCrawler
-   */
-  prototype.crawl = function(done, doc, iterator){
-    doc == null && (doc = document);
-    iterator == null && (iterator = TreeCrawler.processNodeByType);
-    this.reset(doc);
-    TreeCrawler.processElement.call(this, doc.documentElement, iterator);
-    done(this.output);
-  };
+
+var TreeCrawler = Class.create({
+
   /**
    * Lookup table of node types to node type names
    * @type {Object}
    * @memberOf TreeCrawler
    */
-  prototype.NODE_TYPES = {
-    '1': 'ELEMENT_NODE',
-    '2': 'ATTRIBUTE_NODE',
-    '3': 'TEXT_NODE',
-    '4': 'CDATA_SECTION_NODE',
-    '5': 'ENTITY_REFERENCE_NODE',
-    '6': 'ENTITY_NODE',
-    '7': 'PROCESSING_INSTRUCTION_NODE',
-    '8': 'COMMENT_NODE',
-    '9': 'DOCUMENT_NODE',
-    '10': 'DOCUMENT_TYPE_NODE',
-    '11': 'DOCUMENT_FRAGMENT_NODE',
-    '12': 'NOTATION_NODE'
-  };
-  for (type in ref$ = prototype.NODE_TYPES) {
-    name = ref$[type];
-    prototype[name] = new ElementProcessor();
-  }
-  TreeCrawler.getDocType = function(doc){
-    var node, extra;
-    node = doc.doctype || {
-      name: 'html'
-    };
-    extra = '';
-    extra += node.publicId ? " PUBLIC " + node.publicId : '';
-    extra += !node.publicId && node.systemId ? ' SYSTEM' : '';
-    extra += node.systemId ? " " + node.systemId : '';
-    return ("<!DOCTYPE " + node.name) + extra + '>';
-  };
-  TreeCrawler.getNonJsMarkup = function(done){
-    var xhr;
-    xhr = new XMLHttpRequest();
-    xhr.onload = function(e){
-      var doc;
-      doc = document.implementation.createHTMLDocument('no-js');
-      doc.documentElement.innerHTML = this.responseText;
-      Array.prototype.slice.call(doc.querySelectorAll('script:not([type]),script[type="text/javascript"]')).forEach(function(el){
-        return el.setAttribute('type', 'asterisk/ignore');
-      });
-      return done(doc);
-    };
-    xhr.open('GET', window.location.href);
-    xhr.responseType = 'text';
-    return xhr.send();
-  };
+  NODE_TYPES: {
+     '1' : 'ELEMENT_NODE',
+     '2' : 'ATTRIBUTE_NODE',
+     '3' : 'TEXT_NODE',
+     '4' : 'CDATA_SECTION_NODE',
+     '5' : 'ENTITY_REFERENCE_NODE',
+     '6' : 'ENTITY_NODE',
+     '7' : 'PROCESSING_INSTRUCTION_NODE',
+     '8' : 'COMMENT_NODE',
+     '9' : 'DOCUMENT_NODE',
+    '10' : 'DOCUMENT_TYPE_NODE',
+    '11' : 'DOCUMENT_FRAGMENT_NODE',
+    '12' : 'NOTATION_NODE'
+  },
+
   /**
-   * Does the String contain one or more spaces?
-   * @param  {String} x
-   * @return {Boolean}
-   * @static
+   * Restore the crawler's default state
+   * @memberOf TreeCrawler
    */
-  TreeCrawler.hasSpaces = function(x){
-    return x.indexOf(' ') !== -1;
-  };
+  reset: function () {
+    this.depth = 0;
+    this.output = null;
+  },
+
+  /**
+   * Start crawling the document
+   * @param    {Function}     onComplete
+   * @param    {HTMLElement}  [el=document.documentElement]
+   * @param    {Function}     [iterator=TreeCrawler.processNodeByType]
+   * @memberOf TreeCrawler
+   */
+  crawl: function(onComplete, doc, iterator) {
+    this.doc = doc || document;
+    this.iterator = TreeCrawler.processNodeByType;
+  },
+
+  /**
+   * Get the markup for the doctype declaration
+   * @return {String}
+   */
+  getDocType: function() {
+    var element = this.doc.doctype || { name: 'html' };
+    var publicId = element.publicId;
+    var systemId = element.systemId;
+    var extra = '';
+
+    if (publicId) {
+      extra = extra + ' PUBLIC ' + publicId;
+    }
+
+    if (!publicId && systemId) {
+      extra = extra + ' SYSTEM';
+    }
+
+    if (systemId) {
+      extra = extra + ' ' + systemId;
+    }
+
+    return '<!DOCTYPE ' + element.name + extra + '>';
+  },
+
+  /**
+   * Get all <script>s which would be interpreted as JavaScript
+   * @param  {HTMLDocument} doc
+   * @return {HTMLScriptElement[]}
+   */
+  getScripts: function(doc) {
+    return Array.prototype.slice.call(doc.querySelectorAll('script:not([type]),script[type="text/javascript"]'));
+  },
+
+  /**
+   * Create an entire new HTML Document and populate it's HTML
+   * @param  {String} html
+   * @return {HTMLDocument}
+   */
+  createDocument: function(html){
+    var doc = document.implementation.createHTMLDocument('no-js');
+    doc.documentElement.innerHTML = html;
+    return doc;
+  },
+
+  /**
+   * XHR callback for TreeCrawler.getNonJsMarkup
+   * @param  {Function} onComplete
+   * @param  {Object} evnt
+   * @private
+   */
+  _onAjaxedDocumentLoad: function(onComplete, evnt) {
+    var doc = this.createDocument(this.responseText);
+
+    this.getScripts(doc).forEach(function(el) {
+      el.setAttribute('type', 'asterisk/ignore');
+    });
+
+    onComplete(doc);
+  },
+
+  /**
+   * XHR the HTMLDocument in order to get it's original HTML before any JavaScript has augmented it
+   * @param  {Function} onComplete
+   */
+  getNonJsMarkup: function (onComplete) {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = this._onAjaxedDocumentLoad.bind(this, onComplete);
+    xhr.open('GET', location.href);
+    xhr.responseType = 'text';
+    xhr.send();
+  },
+
+  /**
+   * Has the String got spaces in?
+   * @param  {String}  x
+   * @return {Boolean}
+   */
+  hasSpaces: function(x) {
+    return !!~x.indexOf(' ');
+  },
+
   /**
    * Iterator method which routes each element in the document to the appropriate processor based on it's node type
-   * @param  {TreeCrawler}  crawler  Instance of TreeCrawler or one of it's subclasses
    * @param  {HTMLElement}  el
-   * @static
+   * @param  {String} phase  "open" or "close" representing whether we're processing the opening or closing tag for the element
    */
-  TreeCrawler.processNodeByType = function(crawler, el, phase){
-    var lookup, typeName, nodeType;
-    lookup = crawler.NODE_TYPES;
-    typeName = lookup[el.nodeType];
-    if (nodeType = crawler[typeName]) {
-      nodeType[phase](crawler, el, typeName);
+  processNodeByType: function(el, phase) {
+    var lookup = this.NODE_TYPES;
+    var typeName = lookup[el.nodeType];
+    var nodeType = this[typeName];
+
+    if(nodeType) {
+      nodeType[phase](el, typeName);
     }
-  };
+  },
+
   /**
    * Recursively apply the iterator to el, it's children and their descendents
    * @param  {HTMLElement}  el
    * @param  {Function}     iterator
-   * @static
    */
-  TreeCrawler.processElement = function(el, iterator){
-    var i$, ref$, children, len$, child;
-    iterator(this, el, 'opening');
-    if (el.childNodes.length) {
+  processElement: function(el, iterator) {
+    iterator.call(this, el, 'opening');
+    if(el.childNodes.length) {
       this.depth++;
-      for (i$ = 0, len$ = (ref$ = children = el.childNodes).length; i$ < len$; ++i$) {
-        child = ref$[i$];
-        TreeCrawler.processElement.call(this, child, iterator);
-      }
+      this._each(el.childNodes, function(child) {
+        this.processElement.call(this, child, iterator);
+      }.bind(this));
       this.depth--;
     }
-    iterator(this, el, 'closing');
-  };
+    iterator.call(this, el, 'closing');
+  },
+
   /**
    * Map using iterator, el's attributes and values
    * @param  {HTMLElement}  el
    * @param  {Function}     iterator  params are name:String, value:String, isEmpty:Boolean, hasSpaces:Boolean
    * @return {Array}
-   * @static
    */
-  TreeCrawler.processAttrs = function(el, iterator){
-    var i$, ref$, len$, attr, value, results$ = [];
-    for (i$ = 0, len$ = (ref$ = el.attributes).length; i$ < len$; ++i$) {
-      attr = ref$[i$];
-      value = attr.value;
-      results$.push(iterator(attr.name, value, value.length === 0, this.hasSpaces(value)));
+  processAttrs: function(el, iterator) {
+    this._each(el.attributes, function(attr) {
+      var value = attr.value;
+      iterator(attr.name, value, value.length === 0, this.hasSpaces(value));
+    }.bind(this));
+  },
+
+  /**
+   * Iterate over every member of xs, calling f with the arguments: member, i, xs
+   * @param  {Array} xs
+   * @param  {Function} f
+   * @return {Array} xs
+   * @private
+   */
+  _each: function(xs, f) {
+    var i = 0;
+    var len = xs.length;
+
+    while (i < len) {
+      f(xs[i], i++, xs);
     }
-    return results$;
-  };
-  function TreeCrawler(){}
-  return TreeCrawler;
-}());
+    return xs;
+  }
+
+});
