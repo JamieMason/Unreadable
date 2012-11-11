@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+process.chdir(process.cwd());
+
 var program = require('commander');
 var fs = require('fs');
 var exec = require('child_process').exec;
@@ -16,30 +18,33 @@ var commandToClass = {
     };
 
 program
-  .version('0.0.1')
-  .option('-h --help', 'Show this message')
+  .version('0.0.5')
   .option('-u --url [value]', 'URL to process')
   .option('-t --task [value]', 'Task name to perform')
   .parse(process.argv);
 
-taskName = program.task;
-taskName = taskName in commandToClass ? commandToClass[taskName] : taskName;
-nodeTaskPath = __dirname + '/src/' + taskName + '-node.js';
+if(program.url && program.task) {
 
-if(fs.existsSync(nodeTaskPath)) {
-  nodeTask = require(nodeTaskPath);
-}
+  taskName = program.task;
+  taskName = taskName in commandToClass ? commandToClass[taskName] : taskName;
+  nodeTaskPath = __dirname + '/src/' + taskName + '-node.js';
 
-command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + taskName + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
-
-proc = exec(command, function(error, stdout, stderr) {
-
-  if(error !== null) {
-    console.error(error);
-  } else if (nodeTask) {
-    nodeTask.processBrowserOutput(stdout);
-  } else {
-    console.log(stdout);
+  if(fs.existsSync(nodeTaskPath)) {
+    nodeTask = require(nodeTaskPath);
   }
 
-});
+  command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + taskName + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
+
+  proc = exec(command, function(error, stdout, stderr) {
+
+    if(error !== null) {
+      console.error(error);
+    } else if(nodeTask) {
+      nodeTask.processBrowserOutput(stdout);
+    } else {
+      console.log(stdout);
+    }
+
+  });
+
+}
