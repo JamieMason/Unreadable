@@ -1,19 +1,10 @@
+Asterisk
+------
 
-### Note
+## Usage
 
-Asterisk is early in development, it's not ready to use yet.
+#### CSS-aware HTML Minifier
 
-### What is it?
+Opens your web page in PhantomJS, compressing the HTML while taking into account each Element's CSS styles.
 
-An extensible CasperJS DOM utility for analysis and/or transformation of web pages.
-
-### Example
-
-    # -u URL
-    # -t Task name
-    ./asterisk -u http://google.com -t summary # generate a simpler Jade-like version of the HTML
-    ./asterisk -u http://google.com -t minify  # minify HTML and any inline CSS and JS
-
-### Dependencies
-
-- [CasperJS](http://casperjs.org/installation.html)
+    ./asterisk --url http://www.nytimes.com/pages/technology/index.html --task minify > ./index.min.html

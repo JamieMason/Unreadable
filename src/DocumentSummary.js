@@ -1,9 +1,4 @@
 /**
- * @fileOverview
- * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
- */
-
-/**
  * @class    ComputedStyleMinify
  * @extends  TreeCrawler
  */

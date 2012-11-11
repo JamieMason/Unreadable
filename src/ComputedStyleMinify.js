@@ -1,9 +1,4 @@
 /**
- * @fileOverview
- * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
- */
-
-/**
  * @class    ComputedStyleMinify
  * @extends  TreeCrawler
  */
@@ -11,7 +6,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
 
   /**
    * @extends TreeCrawler.reset
-   * @memberOf ComputedStyleMinify
+   * @memberOf ComputedStyleMinify.prototype
    */
   reset: function() {
     this._super();
@@ -29,6 +24,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {HTMLDocument} doc
    * @param  {String} tagName
    * @return {HTMLElement}
+   * @memberOf ComputedStyleMinify.prototype
    */
   getElement: function(doc, tagName) {
     return doc.getElementsByTagName(tagName)[0];
@@ -40,6 +36,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {String} tagName
    * @param  {HTMLDocument} fromDocument
    * @param  {HTMLDocument} toDocument
+   * @memberOf ComputedStyleMinify.prototype
    */
   transferElement: function(tagName, fromDocument, toDocument) {
     var outgoing = this.getElement(toDocument, tagName);
@@ -52,6 +49,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @extends TreeCrawler.crawl
    * @param  {Function}  onComplete  This function is passed the resulting output of processing the document
+   * @memberOf ComputedStyleMinify.prototype
    */
   crawl: function(onComplete) {
     var _super = this._super.bind(this);
@@ -67,6 +65,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @param  {String}  textNodeValue
    * @return {Boolean}
+   * @memberOf ComputedStyleMinify.prototype
    */
   isFormattingWhitespace: function(textNodeValue) {
     return textNodeValue !== ' ' && !!~textNodeValue.search(/\S/);
@@ -78,6 +77,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {String}  value
    * @param  {String}  substitute  Replace the whitespace with this value
    * @return {String}
+   * @memberOf ComputedStyleMinify.prototype
    */
   trimLeft: function(value, substitute){
     return value.replace(/^\s\s*/, substitute);
@@ -89,6 +89,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {String}  value
    * @param  {String}  substitute  Replace the whitespace with this value
    * @return {String}
+   * @memberOf ComputedStyleMinify.prototype
    */
   trimRight: function(value, substitute){
     var i = value.length;
@@ -102,6 +103,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {HTMLElement} el
    * @param  {String} property
    * @return {String}
+   * @memberOf ComputedStyleMinify.prototype
    */
   inspectStyle: function(el, property) {
     var computedStyle = getComputedStyle(el, null);
@@ -115,6 +117,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @param  {String} property
    * @param  {String} subString
    * @return {Boolean}
+   * @memberOf ComputedStyleMinify.prototype
    */
   styleContains: function(el, property, subString) {
     return el === null ? false : !!~this.inspectStyle(el, property).search(subString);
@@ -125,6 +128,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @param  {HTMLElement}  el
    * @return {Boolean}
+   * @memberOf ComputedStyleMinify.prototype
    */
   isInlineElement: function(el) {
     return this.styleContains(el, 'display', 'inline');
@@ -135,6 +139,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @param  {HTMLElement}  el
    * @return {Boolean}
+   * @memberOf ComputedStyleMinify.prototype
    */
   hasSensitiveWhitespace: function(el){
     return this.styleContains(el, 'white-space', 'pre');
@@ -145,6 +150,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @extends TreeCrawler.ELEMENT_NODE_OPEN
    * @param {HTMLElement} el
+   * @memberOf ComputedStyleMinify.prototype
    */
   ELEMENT_NODE_OPEN: function(el) {
     var nodeName = el.nodeName.toLowerCase();
@@ -173,6 +179,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @extends TreeCrawler.ELEMENT_NODE_CLOSE
    * @param {HTMLElement} el
+   * @memberOf ComputedStyleMinify.prototype
    */
   ELEMENT_NODE_CLOSE: function(el) {
     var nodeName = el.nodeName.toLowerCase();
@@ -187,6 +194,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
    *
    * @extends TreeCrawler.TEXT_NODE_OPEN
    * @param {Text} el
+   * @memberOf ComputedStyleMinify.prototype
    */
   TEXT_NODE_OPEN: function(el) {
     var value = el.nodeValue;

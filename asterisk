@@ -2,8 +2,6 @@
 
 var program = require('commander');
 var fs = require('fs');
-// var cleanCSS = require('clean-css');
-// var uglify = require('uglify-js');
 var exec = require('child_process').exec;
 var postProcess;
 var command;

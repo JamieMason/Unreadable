@@ -1,8 +1,3 @@
-/**
- * @fileOverview This is the Phantom Script called by the asterisk binary
- * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
- */
-
 var system = require('system');
 var cwd = system.args[1];
 var url = system.args[2] || 'about:blank';

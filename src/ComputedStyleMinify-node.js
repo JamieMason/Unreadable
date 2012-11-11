@@ -1,8 +1,3 @@
-/**
- * @fileOverview
- * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
- */
-
 var cleanCSS = require('clean-css');
 var uglify = require('uglify-js');
 
