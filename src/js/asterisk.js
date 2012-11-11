@@ -26,26 +26,26 @@ page.onConsoleMessage = function(msg){
 };
 
 page.onError = function(msg, trace) {
-    var msgStack = ["ERROR: " + msg];
-    if (trace) {
-        msgStack.push("TRACE:");
-        trace.forEach(function(t) {
-            msgStack.push(" -> " + t.file + ": " + t.line + (t.function ? " (in function '" + t.function + "')" : ""));
-        });
-    }
-    console.error(msgStack.join("\n"));
-    phantom.exit();
+  var msgStack = ['ERROR: ' + msg];
+  if (trace) {
+    msgStack.push('TRACE:');
+    trace.forEach(function(t) {
+      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function + '")' : ''));
+    });
+  }
+  console.error(msgStack.join('\n'));
+  phantom.exit();
 };
 
 page.open(url, function(status){
-  page.injectJs('browser/ElementProcessor.js');
+  page.injectJs('browser/shims.js');
+  page.injectJs('browser/ajax.js');
+  page.injectJs('browser/Class.js');
   page.injectJs('browser/TreeCrawler.js');
   page.injectJs('browser/DocumentSummary.js');
   page.injectJs('browser/ComputedStyleMinify.js');
-  page.injectJs('browser/ajax.js');
   page.evaluate(function(messagePrefix, exitMessage, taskName){
-    var iterator = new window[taskName]();
-    iterator.crawl(function(output){
+    new window[taskName]().crawl(function(output){
       console.log(messagePrefix, output);
       console.log(exitMessage);
     });

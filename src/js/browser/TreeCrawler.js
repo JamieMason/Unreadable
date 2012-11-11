@@ -3,7 +3,7 @@
  * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
  */
 
-var TreeCrawler = Class.create({
+var TreeCrawler = Class.extend({
 
   /**
    * Lookup table of node types to node type names
@@ -61,14 +61,14 @@ var TreeCrawler = Class.create({
 
   /**
    * Start crawling the document
-   * @param    {Function}     onComplete
-   * @param    {HTMLElement}  [el=document.documentElement]
-   * @param    {Function}     [iterator=TreeCrawler.processNodeByType]
+   * @param    {Function}  onComplete
    * @memberOf TreeCrawler
    */
-  crawl: function(onComplete, doc, iterator) {
-    this.doc = doc || document;
-    this.iterator = TreeCrawler.processNodeByType;
+  crawl: function(onComplete) {
+    this.iterator = this.processNodeByType;
+    this.reset();
+    this.processElement(document.documentElement);
+    onComplete(this.output);
   },
 
   /**
@@ -76,7 +76,7 @@ var TreeCrawler = Class.create({
    * @return {String}
    */
   getDocType: function() {
-    var element = this.doc.doctype || { name: 'html' };
+    var element = document.doctype || { name: 'html' };
     var publicId = element.publicId;
     var systemId = element.systemId;
     var extra = '';
@@ -122,8 +122,8 @@ var TreeCrawler = Class.create({
    * @param  {Object} evnt
    * @private
    */
-  _onAjaxedDocumentLoad: function(onComplete, evnt) {
-    var doc = this.createDocument(this.responseText);
+  _onAjaxedDocumentLoad: function(xhr, onComplete, evnt) {
+    var doc = this.createDocument(xhr.responseText);
 
     this.getScripts(doc).forEach(function(el) {
       el.setAttribute('type', 'asterisk/ignore');
@@ -138,7 +138,7 @@ var TreeCrawler = Class.create({
    */
   getNonJsMarkup: function (onComplete) {
     var xhr = new XMLHttpRequest();
-    xhr.onload = this._onAjaxedDocumentLoad.bind(this, onComplete);
+    xhr.onload = this._onAjaxedDocumentLoad.bind(this, xhr, onComplete);
     xhr.open('GET', location.href);
     xhr.responseType = 'text';
     xhr.send();
@@ -163,20 +163,19 @@ var TreeCrawler = Class.create({
   },
 
   /**
-   * Recursively apply the iterator to el, it's children and their descendents
+   * Recursively process el, it's children and their descendents
    * @param  {HTMLElement}  el
-   * @param  {Function}     iterator
    */
-  processElement: function(el, iterator) {
-    iterator.call(this, el, 'OPEN');
+  processElement: function(el) {
+    this.iterator(el, 'OPEN');
     if(el.childNodes.length) {
       this.depth++;
       this._each(el.childNodes, function(child) {
-        this.processElement(child, iterator);
+        this.processElement(child);
       }.bind(this));
       this.depth--;
     }
-    iterator.call(this, el, 'CLOSE');
+    this.iterator(el, 'CLOSE');
   },
 
   /**

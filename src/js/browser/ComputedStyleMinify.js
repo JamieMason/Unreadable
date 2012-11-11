@@ -13,10 +13,10 @@ var ComputedStyleMinify = TreeCrawler.extend({
    * @extends TreeCrawler.reset
    * @memberOf ComputedStyleMinify
    */
-  reset: function(doc) {
-    this.super();
+  reset: function() {
+    this._super();
     this.output = {
-      html: [this.getDocType(doc) + '\n'],
+      html: [this.getDocType(document) + '\n'],
       iScripts: [],
       iStyles: [],
       logs: []
@@ -33,14 +33,15 @@ var ComputedStyleMinify = TreeCrawler.extend({
     outgoing.parentNode.replaceChild(incoming, outgoing);
   },
 
-  crawl: function(done) {
-    TreeCrawler.getNonJsMarkup(function(doc) {
+  crawl: function(onComplete) {
+    var _super = this._super.bind(this);
+
+    this.getNonJsMarkup(function(doc) {
       this.transferElement('head', doc, document);
       this.transferElement('body', doc, document);
 
-      this._super(function(output) {
-        this.output = JSON.stringify(output);
-        done(this.output);
+      _super(function(output) {
+        onComplete(this.output = JSON.stringify(output));
       }.bind(this));
     }.bind(this));
   },
@@ -53,11 +54,14 @@ var ComputedStyleMinify = TreeCrawler.extend({
     return textNodeValue !== ' ' && !!~textNodeValue.search(/\S/);
   },
 
-  trim: function(){
-    var textNodeValue = textNodeValue.replace(/^\s\s*/, '');
-    var i = textNodeValue.length;
-    do {} while (/\s/.test(textNodeValue.charAt(--i)));
-    textNodeValue.slice(0, i + 1);
+  trimLeft: function(value, substitute){
+    return value.replace(/^\s\s*/, substitute);
+  },
+
+  trimRight: function(value, substitute){
+    var i = value.length;
+    do {} while (/\s/.test(value.charAt(--i)));
+    return value.slice(0, i + 1) + substitute;
   },
 
   isInlineElement: function(el) {
@@ -73,7 +77,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
     var attrs = this.attrsToHtml(el);
     var output = this.output;
 
-    attrs = attrs.length ? ' ' + attrs.join(' ') : ' ';
+    attrs = attrs.length ? ' ' + attrs.join(' ') : '';
 
     if(nodeName === 'style') {
       output.iStyles.push(output.html.length + 1);
@@ -100,9 +104,13 @@ var ComputedStyleMinify = TreeCrawler.extend({
 
   TEXT_NODE_OPEN: function(el) {
     var value = el.nodeValue;
-    if(!!~value.search(/[^ ]/)) {
-      value = value.replace(/^\s+/, this.isInlineElement(el.previousSibling) ? ' ' : '');
-    }
+
+    // if(!!~value.search(/[^ ]/)) {
+    //   value = value.replace(/^\s+/, this.isInlineElement(el.previousSibling) ? ' ' : '');
+    // }
+
+    value = this.trimLeft(value, this.isInlineElement(el.previousSibling) ? ' ' : '');
+    value = this.trimRight(value, this.isInlineElement(el.nextSibling) ? ' ' : '');
     this.output.html.push(value);
   }
 
