@@ -68,7 +68,7 @@ var TreeCrawler = Class.extend({
     this.iterator = this.processNodeByType;
     this.reset();
     this.processElement(document.documentElement);
-    onComplete(this.output);
+    onComplete(this.output = JSON.stringify(this.output));
   },
 
   /**

@@ -18,7 +18,7 @@ var DocumentSummary = TreeCrawler.extend({
     this.output = [];
   },
 
-  ELEMENT_NODE_OPENING: function(el) {
+  ELEMENT_NODE_OPEN: function(el) {
     var indentation = new Array((this.depth * 2) + 1).join(' ');
     var element = el.nodeName.toLowerCase();
     var attrs = this.attrsToHtml(el);

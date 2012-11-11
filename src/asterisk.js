@@ -10,12 +10,6 @@ var task = system.args[3];
 var page = require('webpage').create();
 var messagePrefix = '[ASTERISK]';
 var exitMessage = messagePrefix + ' END';
-var commandToClass = {
-  summary: 'DocumentSummary',
-  minify: 'ComputedStyleMinify'
-};
-
-task = task in commandToClass ? commandToClass[task] : task;
 
 page.onConsoleMessage = function(msg){
   return msg === exitMessage ?

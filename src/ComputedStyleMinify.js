@@ -39,10 +39,7 @@ var ComputedStyleMinify = TreeCrawler.extend({
     this.getNonJsMarkup(function(doc) {
       this.transferElement('head', doc, document);
       this.transferElement('body', doc, document);
-
-      _super(function(output) {
-        onComplete(this.output = JSON.stringify(output));
-      }.bind(this));
+      _super(onComplete);
     }.bind(this));
   },
 

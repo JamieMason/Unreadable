@@ -1,12 +1,21 @@
 #!/usr/bin/env node
 
 var program = require('commander');
-var cleanCSS = require('clean-css');
-var uglify = require('uglify-js');
+var fs = require('fs');
+// var cleanCSS = require('clean-css');
+// var uglify = require('uglify-js');
 var exec = require('child_process').exec;
+var postProcess;
 var command;
 var proc;
 var output;
+var taskName;
+var nodeTask;
+var nodeTaskPath;
+var commandToClass = {
+      summary: 'DocumentSummary',
+      minify: 'ComputedStyleMinify'
+    };
 
 program
   .version('0.0.1')
@@ -15,40 +24,24 @@ program
   .option('-t --task [value]', 'Task name to perform')
   .parse(process.argv);
 
-command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + program.task + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
+taskName = program.task;
+taskName = taskName in commandToClass ? commandToClass[taskName] : taskName;
+nodeTaskPath = __dirname + '/src/' + taskName + '-node.js';
+
+if(fs.existsSync(nodeTaskPath)) {
+  nodeTask = require(nodeTaskPath);
+}
+
+command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + taskName + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
 
 proc = exec(command, function(error, stdout, stderr) {
 
   if(error !== null) {
-    return console.error(error);
+    console.error(error);
+  } else if (nodeTask) {
+    nodeTask.processBrowserOutput(stdout);
+  } else {
+    console.log(stdout);
   }
-
-  // console.log(stdout); return;
-
-  var output = JSON.parse(stdout);
-
-  if(output === null) {
-    return console.error('null output');
-  }
-
-  function minifyJs(data) {
-    var ast = uglify.parser.parse(data);
-    ast = uglify.uglify.ast_mangle(ast);
-    ast = uglify.uglify.ast_squeeze(ast);
-    data = uglify.uglify.gen_code(ast, {
-      inline_script: true
-    });
-    return data;
-  }
-
-  output.iStyles.forEach(function(lineNumber){
-    output.html[lineNumber] = cleanCSS.process(output.html[lineNumber]);
-  });
-
-  output.iScripts.forEach(function(lineNumber){
-    output.html[lineNumber] = minifyJs(output.html[lineNumber]);
-  });
-
-  console.log(output.html.join(''));
 
 });
