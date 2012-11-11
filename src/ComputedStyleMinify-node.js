@@ -26,7 +26,7 @@ exports.processBrowserOutput = function (stdout) {
 
   if (json.iScripts.length) {
     json.iScripts.forEach(function(lineNumber){
-      json.html[lineNumber] = minifyJs(json.html[lineNumber]);
+      json.html[lineNumber] = minifyJs(json.html[lineNumber].replace(/^\s*<!\-\-|\/*\-\->\s*$/g, ''));
     });
   }
 
