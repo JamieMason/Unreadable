@@ -61,12 +61,21 @@ var ComputedStyleMinify = TreeCrawler.extend({
     return value.slice(0, i + 1) + substitute;
   },
 
+  inspectStyle: function(el, property) {
+    var computedStyle = getComputedStyle(el, null);
+    return(computedStyle && computedStyle.getPropertyValue(property) + '') || '';
+  },
+
+  styleContains: function(el, property, subString) {
+    return el === null ? false : !!~this.inspectStyle(el, property).search(subString);
+  },
+
   isInlineElement: function(el) {
-    if(el === null) {
-      return false;
-    }
-    var computedStyle = window.getComputedStyle(el, null);
-    return (computedStyle && !!~computedStyle.getPropertyValue('display').indexOf('inline')) || false;
+    return this.styleContains(el, 'display', 'inline');
+  },
+
+  hasSensitiveWhitespace: function(el){
+    return this.styleContains(el, 'white-space', 'pre');
   },
 
   ELEMENT_NODE_OPEN: function(el) {
@@ -101,13 +110,10 @@ var ComputedStyleMinify = TreeCrawler.extend({
 
   TEXT_NODE_OPEN: function(el) {
     var value = el.nodeValue;
-
-    // if(!!~value.search(/[^ ]/)) {
-    //   value = value.replace(/^\s+/, this.isInlineElement(el.previousSibling) ? ' ' : '');
-    // }
-
-    value = this.trimLeft(value, this.isInlineElement(el.previousSibling) ? ' ' : '');
-    value = this.trimRight(value, this.isInlineElement(el.nextSibling) ? ' ' : '');
+    if(!this.hasSensitiveWhitespace(el.parentNode)) {
+      value = this.trimLeft(value, this.isInlineElement(el.previousSibling) ? ' ' : '');
+      value = this.trimRight(value, this.isInlineElement(el.nextSibling) ? ' ' : '');
+    }
     this.output.html.push(value);
   }
 
