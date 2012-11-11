@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>Minify Test</title>
+  <style type="text/css">
+  *{
+    margin:0;
+    padding:0;
+  }
+
+  html{
+    padding:1em;
+    padding-bottom:0;
+  }
+  p,ul,hr{
+    margin-bottom:1em;
+  }
+
+  .nav{
+    list-style:none;
+    margin-left:0;
+  }
+
+    .nav > li,
+      .nav > li > a{
+        display:inline-block;
+         *display:inline;
+        zoom:1;
+      }​
+  </style>
+</head>
+<body>
+  <p><a href=#>This is a link</a> <a href=#>with a link next to it</a>.</p>
+
+  <p>This is an <em>em</em> <strong>strong</strong> combo!</p>
+
+  <ul class=nav>
+    <li><a href=#>Baz</a></li>
+    <li><a href=#>Bar</a></li>
+    <li><a href=#>Foo</a></li>
+  </ul>
+
+  <hr>
+
+  <p><a href=#>This is a link</a><a href=#>with a link next to it</a>.</p><p>This is an <em>em</em><strong>strong</strong> combo!</p><ul class=nav><li><a href=#>Baz</a></li><li><a href=#>Bar</a></li><li><a href=#>Foo</a></li></ul>​
+  <script src="../src/js/browser/ajax.js"></script>
+  <script src="../src/js/browser/Class.js"></script>
+  <script src="../src/js/browser/TreeCrawler.js"></script>
+  <script src="../src/js/browser/DocumentSummary.js"></script>
+  <script src="../src/js/browser/ComputedStyleMinify.js"></script>
+  <script>
+    var taskName = 'ComputedStyleMinify';
+    new window[taskName]().crawl(function(output){
+      console.log(output);
+    });
+  </script>
+</body>
+</html>
