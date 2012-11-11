@@ -3,22 +3,6 @@
  * @author Jamie Mason, <a href="http://twitter.com/gotnosugarbaby">@GotNoSugarBaby</a>, <a href="https://github.com/JamieMason">https://github.com/JamieMason</a>
  */
 
-/**
- * @class TreeCrawler
- * @property {Object} ELEMENT_NODE
- * @property {Object} ATTRIBUTE_NODE
- * @property {Object} TEXT_NODE
- * @property {Object} CDATA_SECTION_NODE
- * @property {Object} ENTITY_REFERENCE_NODE
- * @property {Object} ENTITY_NODE
- * @property {Object} PROCESSING_INSTRUCTION_NODE
- * @property {Object} COMMENT_NODE
- * @property {Object} DOCUMENT_NODE
- * @property {Object} DOCUMENT_TYPE_NODE
- * @property {Object} DOCUMENT_FRAGMENT_NODE
- * @property {Object} NOTATION_NODE
- */
-
 var TreeCrawler = Class.create({
 
   /**
@@ -40,6 +24,31 @@ var TreeCrawler = Class.create({
     '11' : 'DOCUMENT_FRAGMENT_NODE',
     '12' : 'NOTATION_NODE'
   },
+
+  ELEMENT_NODE_OPEN: function(){},
+  ELEMENT_NODE_CLOSE: function(){},
+  ATTRIBUTE_NODE_OPEN: function(){},
+  ATTRIBUTE_NODE_CLOSE: function(){},
+  TEXT_NODE_OPEN: function(){},
+  TEXT_NODE_CLOSE: function(){},
+  CDATA_SECTION_NODE_OPEN: function(){},
+  CDATA_SECTION_NODE_CLOSE: function(){},
+  ENTITY_REFERENCE_NODE_OPEN: function(){},
+  ENTITY_REFERENCE_NODE_CLOSE: function(){},
+  ENTITY_NODE_OPEN: function(){},
+  ENTITY_NODE_CLOSE: function(){},
+  PROCESSING_INSTRUCTION_NODE_OPEN: function(){},
+  PROCESSING_INSTRUCTION_NODE_CLOSE: function(){},
+  COMMENT_NODE_OPEN: function(){},
+  COMMENT_NODE_CLOSE: function(){},
+  DOCUMENT_NODE_OPEN: function(){},
+  DOCUMENT_NODE_CLOSE: function(){},
+  DOCUMENT_TYPE_NODE_OPEN: function(){},
+  DOCUMENT_TYPE_NODE_CLOSE: function(){},
+  DOCUMENT_FRAGMENT_NODE_OPEN: function(){},
+  DOCUMENT_FRAGMENT_NODE_CLOSE: function(){},
+  NOTATION_NODE_OPEN: function(){},
+  NOTATION_NODE_CLOSE: function(){},
 
   /**
    * Restore the crawler's default state
@@ -150,13 +159,7 @@ var TreeCrawler = Class.create({
    * @param  {String} phase  "open" or "close" representing whether we're processing the opening or closing tag for the element
    */
   processNodeByType: function(el, phase) {
-    var lookup = this.NODE_TYPES;
-    var typeName = lookup[el.nodeType];
-    var nodeType = this[typeName];
-
-    if(nodeType) {
-      nodeType[phase](el, typeName);
-    }
+    this[this.NODE_TYPES[el.nodeType] + '_' + phase](el);
   },
 
   /**
@@ -165,15 +168,15 @@ var TreeCrawler = Class.create({
    * @param  {Function}     iterator
    */
   processElement: function(el, iterator) {
-    iterator.call(this, el, 'opening');
+    iterator.call(this, el, 'OPEN');
     if(el.childNodes.length) {
       this.depth++;
       this._each(el.childNodes, function(child) {
-        this.processElement.call(this, child, iterator);
+        this.processElement(child, iterator);
       }.bind(this));
       this.depth--;
     }
-    iterator.call(this, el, 'closing');
+    iterator.call(this, el, 'CLOSE');
   },
 
   /**
@@ -183,10 +186,24 @@ var TreeCrawler = Class.create({
    * @return {Array}
    */
   processAttrs: function(el, iterator) {
-    this._each(el.attributes, function(attr) {
+    return this._each(el.attributes, function(attr) {
       var value = attr.value;
-      iterator(attr.name, value, value.length === 0, this.hasSpaces(value));
+      return iterator(attr.name, value, value.length === 0, this.hasSpaces(value));
     }.bind(this));
+  },
+
+  attrToHtml: function(name, value, isEmpty, hasSpaces) {
+    if(isEmpty) {
+      return name;
+    }
+    if(hasSpaces) {
+      value = '"' + value + '"';
+    }
+    return name + '=' + value;
+  },
+
+  attrsToHtml: function(el) {
+    return this.processAttrs(el, this.attrToHtml);
   },
 
   /**
@@ -199,11 +216,13 @@ var TreeCrawler = Class.create({
   _each: function(xs, f) {
     var i = 0;
     var len = xs.length;
+    var ys = [];
 
     while (i < len) {
-      f(xs[i], i++, xs);
+      ys.push(f(xs[i], i++, xs));
     }
-    return xs;
+
+    return ys;
   }
 
 });
