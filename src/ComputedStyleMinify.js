@@ -23,19 +23,38 @@ var ComputedStyleMinify = TreeCrawler.extend({
     };
   },
 
-  getElement: function(doc, selector) {
-    return doc.getElementsByTagName(selector)[0];
+  /**
+   * Returns the first element matching the nodeName provided
+   *
+   * @param  {HTMLDocument} doc
+   * @param  {String} tagName
+   * @return {HTMLElement}
+   */
+  getElement: function(doc, tagName) {
+    return doc.getElementsByTagName(tagName)[0];
   },
 
-  transferElement: function(selector, fromDocument, toDocument) {
-    var outgoing = this.getElement(toDocument, selector);
-    var incoming = this.getElement(fromDocument, selector);
+  /**
+   * Copy the first element matching the nodeName provided from one HTMLDocument to another
+   *
+   * @param  {String} tagName
+   * @param  {HTMLDocument} fromDocument
+   * @param  {HTMLDocument} toDocument
+   */
+  transferElement: function(tagName, fromDocument, toDocument) {
+    var outgoing = this.getElement(toDocument, tagName);
+    var incoming = this.getElement(fromDocument, tagName);
     outgoing.parentNode.replaceChild(incoming, outgoing);
   },
 
+  /**
+   * Process the document
+   *
+   * @extends TreeCrawler.crawl
+   * @param  {Function}  onComplete  This function is passed the resulting output of processing the document
+   */
   crawl: function(onComplete) {
     var _super = this._super.bind(this);
-
     this.getNonJsMarkup(function(doc) {
       this.transferElement('head', doc, document);
       this.transferElement('body', doc, document);
@@ -44,6 +63,8 @@ var ComputedStyleMinify = TreeCrawler.extend({
   },
 
   /**
+   * Is this text node whitespace for indentation, not content?
+   *
    * @param  {String}  textNodeValue
    * @return {Boolean}
    */
@@ -51,33 +72,80 @@ var ComputedStyleMinify = TreeCrawler.extend({
     return textNodeValue !== ' ' && !!~textNodeValue.search(/\S/);
   },
 
+  /**
+   * Replace leading whitespace with our substitute
+   *
+   * @param  {String}  value
+   * @param  {String}  substitute  Replace the whitespace with this value
+   * @return {String}
+   */
   trimLeft: function(value, substitute){
     return value.replace(/^\s\s*/, substitute);
   },
 
+  /**
+   * Replace trailing whitespace with our substitute
+   *
+   * @param  {String}  value
+   * @param  {String}  substitute  Replace the whitespace with this value
+   * @return {String}
+   */
   trimRight: function(value, substitute){
     var i = value.length;
     do {} while (/\s/.test(value.charAt(--i)));
     return value.slice(0, i + 1) + substitute;
   },
 
+  /**
+   * Read the computed style property of an HTMLElement
+   *
+   * @param  {HTMLElement} el
+   * @param  {String} property
+   * @return {String}
+   */
   inspectStyle: function(el, property) {
     var computedStyle = getComputedStyle(el, null);
     return(computedStyle && computedStyle.getPropertyValue(property) + '') || '';
   },
 
+  /**
+   * Does the HTMLElement's computed style contain our sub string?
+   *
+   * @param  {HTMLElement} el
+   * @param  {String} property
+   * @param  {String} subString
+   * @return {Boolean}
+   */
   styleContains: function(el, property, subString) {
     return el === null ? false : !!~this.inspectStyle(el, property).search(subString);
   },
 
+  /**
+   * Is the Element's CSS display property either inline or inline-block?
+   *
+   * @param  {HTMLElement}  el
+   * @return {Boolean}
+   */
   isInlineElement: function(el) {
     return this.styleContains(el, 'display', 'inline');
   },
 
+  /**
+   * Is the Element's CSS white-space property either pre, pre-line or pre-wrap?
+   *
+   * @param  {HTMLElement}  el
+   * @return {Boolean}
+   */
   hasSensitiveWhitespace: function(el){
     return this.styleContains(el, 'white-space', 'pre');
   },
 
+  /**
+   * Process the opening tag of HTMLElement
+   *
+   * @extends TreeCrawler.ELEMENT_NODE_OPEN
+   * @param {HTMLElement} el
+   */
   ELEMENT_NODE_OPEN: function(el) {
     var nodeName = el.nodeName.toLowerCase();
     var attrs = this.attrsToHtml(el);
@@ -100,6 +168,12 @@ var ComputedStyleMinify = TreeCrawler.extend({
     output.html.push('<' + nodeName + attrs + '>');
   },
 
+  /**
+   * Process the closing tag of HTMLElement
+   *
+   * @extends TreeCrawler.ELEMENT_NODE_CLOSE
+   * @param {HTMLElement} el
+   */
   ELEMENT_NODE_CLOSE: function(el) {
     var nodeName = el.nodeName.toLowerCase();
     // if closing tag is not optional or forbidden
@@ -108,6 +182,12 @@ var ComputedStyleMinify = TreeCrawler.extend({
     this.output.html.push('</' + nodeName + '>');
   },
 
+  /**
+   * Process a text node
+   *
+   * @extends TreeCrawler.TEXT_NODE_OPEN
+   * @param {Text} el
+   */
   TEXT_NODE_OPEN: function(el) {
     var value = el.nodeValue;
     if(!this.hasSensitiveWhitespace(el.parentNode)) {
