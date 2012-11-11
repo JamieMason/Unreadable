@@ -38,12 +38,12 @@ page.onError = function(msg, trace) {
 };
 
 page.open(url, function(status){
-  page.injectJs('browser/shims.js');
-  page.injectJs('browser/ajax.js');
-  page.injectJs('browser/Class.js');
-  page.injectJs('browser/TreeCrawler.js');
-  page.injectJs('browser/DocumentSummary.js');
-  page.injectJs('browser/ComputedStyleMinify.js');
+  page.injectJs('shims.js');
+  page.injectJs('ajax.js');
+  page.injectJs('Class.js');
+  page.injectJs('TreeCrawler.js');
+  page.injectJs('DocumentSummary.js');
+  page.injectJs('ComputedStyleMinify.js');
   page.evaluate(function(messagePrefix, exitMessage, taskName){
     new window[taskName]().crawl(function(output){
       console.log(messagePrefix, output);

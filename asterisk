@@ -15,7 +15,7 @@ program
   .option('-t --task [value]', 'Task name to perform')
   .parse(process.argv);
 
-command = 'phantomjs "' + __dirname + '/src/js/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + program.task + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
+command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + program.task + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
 
 proc = exec(command, function(error, stdout, stderr) {
 
