@@ -33,7 +33,6 @@ page.onError = function(msg, trace) {
 
 page.open(url, function(status){
   page.injectJs('shims.js');
-  page.injectJs('ajax.js');
   page.injectJs('Class.js');
   page.injectJs('TreeCrawler.js');
   page.injectJs('DocumentSummary.js');
