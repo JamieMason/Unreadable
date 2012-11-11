@@ -1,0 +1,28 @@
+{
+  "name": "Asterisk",
+  "version": "0.0.4",
+  "description": "A CSS-aware HTML Minfier for PhantomJS",
+  "keywords": [
+    "minify",
+    "optimize",
+    "compress",
+    "performance",
+    "html"
+  ],
+  "author": {
+    "name": "Jamie Mason"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JamieMason/Asterisk"
+  },
+  "dependencies": {
+    "clean-css": ">= 0.8.x",
+    "commander": ">= 1.0.5",
+    "uglify-js": ">= 1.3.4"
+  },
+  "main": "index",
+  "engines": {
+    "node": ">= 0.8.x"
+  }
+}
