@@ -1,7 +1,7 @@
 var cleanCSS = require('clean-css');
 var uglify = require('uglify-js');
 var uglifyProcessor = uglify.uglify;
-var uglifyConfig = require('../defaults.json').uglify_js;
+var uglifyConfig = require('../config.json').uglify_js;
 
 function minifyJs(data) {
   var ast = uglify.parser.parse(data, uglifyConfig.strict_semicolons);

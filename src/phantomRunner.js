@@ -2,28 +2,10 @@ var system = require('system');
 var cwd = system.args[1];
 var url = system.args[2] || 'about:blank';
 var task = system.args[3];
-var userConfigPath = system.args[4];
 var page = require('webpage').create();
 var messagePrefix = '[ASTERISK]';
 var exitMessage = messagePrefix + ' END';
-var userConfig = userConfigPath ? require(userConfigPath) : null;
-var config = require('../defaults.json');
-
-function deepExtend(destination, source) {
-  for(var property in source) {
-    if(source[property] && source[property].constructor && source[property].constructor === Object) {
-      destination[property] = destination[property] || {};
-      deepExtend(destination[property], source[property]);
-    } else {
-      destination[property] = source[property];
-    }
-  }
-  return destination;
-}
-
-if (userConfig) {
-  config = deepExtend(config, userConfig);
-}
+var config = require('../config.json');
 
 page.onConsoleMessage = function(msg){
   return msg === exitMessage ?
