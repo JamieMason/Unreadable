@@ -40,7 +40,7 @@ These elements don't have closing tags, such as `<img src="nevergonna.png"></img
 These values are applied to UglifyJS and are documented at https://github.com/mishoo/UglifyJS
 
 #### .uglify_js.inline_script (true)
-Since we're Uglifying JavaScript found in <script> blocks as opposed to external files, I wouldn't recommend changing this value.
+Since we're Uglifying JavaScript found in `<script>` blocks as opposed to external files, I wouldn't recommend changing this value.
 
 ### Your overrides JSON file
 
