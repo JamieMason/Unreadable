@@ -3,6 +3,10 @@
  */
 var TreeCrawler = Class.extend({
 
+  init: function(config) {
+    this.config = config;
+  },
+
   /**
    * Lookup table of node types to node type names
    *

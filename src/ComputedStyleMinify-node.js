@@ -1,13 +1,20 @@
 var cleanCSS = require('clean-css');
 var uglify = require('uglify-js');
+var uglifyProcessor = uglify.uglify;
+var uglifyConfig = require('../defaults.json').uglify_js;
 
 function minifyJs(data) {
-  var ast = uglify.parser.parse(data);
-  ast = uglify.uglify.ast_mangle(ast);
-  ast = uglify.uglify.ast_squeeze(ast);
-  return uglify.uglify.gen_code(ast, {
-    inline_script: true
-  });
+  var ast = uglify.parser.parse(data, uglifyConfig.strict_semicolons);
+  if (uglifyConfig.lift_variables) {
+    ast = uglifyProcessor.ast_lift_variables(ast);
+  }
+  if (!uglifyConfig.no_mangle) {
+    ast = uglifyProcessor.ast_mangle(ast, uglifyConfig.mangle);
+  }
+  if (!uglifyConfig.no_squeeze) {
+    ast = uglifyProcessor.ast_squeeze(ast, uglifyConfig.squeeze);
+  }
+  return uglifyProcessor.gen_code(ast, uglifyConfig.gen_code);
 }
 
 exports.processBrowserOutput = function (stdout) {

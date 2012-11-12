@@ -5,6 +5,7 @@ var task = system.args[3];
 var page = require('webpage').create();
 var messagePrefix = '[ASTERISK]';
 var exitMessage = messagePrefix + ' END';
+var config = require('../defaults.json');
 
 page.onConsoleMessage = function(msg){
   return msg === exitMessage ?
@@ -32,10 +33,10 @@ page.open(url, function(status){
   page.injectJs('TreeCrawler.js');
   page.injectJs('DocumentSummary.js');
   page.injectJs('ComputedStyleMinify.js');
-  page.evaluate(function(messagePrefix, exitMessage, taskName){
-    new window[taskName]().crawl(function(output){
+  page.evaluate(function(messagePrefix, exitMessage, taskName, config){
+    new window[taskName](config).crawl(function(output){
       console.log(messagePrefix, output);
       console.log(exitMessage);
     });
-  }, messagePrefix, exitMessage, task);
+  }, messagePrefix, exitMessage, task, config);
 });

@@ -4,6 +4,17 @@
  */
 var ComputedStyleMinify = TreeCrawler.extend({
 
+  minifyConfig: {},
+  reClosingTagForbidden: /./,
+  reClosingTagOptional: /./,
+
+  init: function(config) {
+    this._super(config);
+    this.minifyConfig = this.config.asterisk_minify;
+    this.reClosingTagForbidden = new RegExp('^(' + this.minifyConfig.forbidden_closing_tags.join('|') + ')$');
+    this.reClosingTagOptional = new RegExp('^(' + this.minifyConfig.optional_closing_tags.join('|') + ')$');
+  },
+
   /**
    * @extends TreeCrawler.reset
    * @memberOf ComputedStyleMinify.prototype
@@ -183,9 +194,12 @@ var ComputedStyleMinify = TreeCrawler.extend({
    */
   ELEMENT_NODE_CLOSE: function(el) {
     var nodeName = el.nodeName.toLowerCase();
-    // if closing tag is not optional or forbidden
-    // if nodeName.search(/^(body|colgroup|dd|dt|head|html|li|option|tbody|td|tfoot|th|thead|tr)$/) is -1 and nodeName.search(/^(img|input|br|hr|frame|area|base|basefont|col|isindex|link|meta|param)$/) is -1
-    //   crawler.output.html.push("</#{nodeName}>")
+
+    // omit closing tag if forbidden, or optional and we want to remove optional closing tags...
+    if (!!~nodeName.search(this.reClosingTagForbidden) || (this.minifyConfig.remove_optional_closing_tags && !!~nodeName.search(this.reClosingTagOptional))) {
+      return;
+    }
+
     this.output.html.push('</' + nodeName + '>');
   },
 
