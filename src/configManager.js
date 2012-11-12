@@ -53,11 +53,3 @@ exports.getUserConfig = function() {
 exports.getConfig = function() {
   return exports.deepExtend(exports.getDefaultConfig(), exports.getUserConfig());
 };
-
-exports.getPathToConfig = function() {
-  return path.resolve(exports.binDir, 'config.json');
-};
-
-exports.writeConfig = function() {
-  fs.writeFileSync(exports.getPathToConfig(), JSON.stringify(exports.getConfig()), 'utf8');
-};

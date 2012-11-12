@@ -1,7 +1,7 @@
 var cleanCSS = require('clean-css');
 var uglify = require('uglify-js');
 var uglifyProcessor = uglify.uglify;
-var uglifyConfig = require('../config.json').uglify_js;
+var uglifyConfig;
 
 function minifyJs(data) {
   var ast = uglify.parser.parse(data, uglifyConfig.strict_semicolons);
@@ -17,9 +17,11 @@ function minifyJs(data) {
   return uglifyProcessor.gen_code(ast, uglifyConfig.gen_code);
 }
 
-exports.processBrowserOutput = function (stdout) {
+exports.processBrowserOutput = function (stdout, config) {
 
   var json = JSON.parse(stdout);
+
+  uglifyConfig = config.uglify_js;
 
   if (json === null) {
     console.error('null output');

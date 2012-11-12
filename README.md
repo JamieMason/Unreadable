@@ -9,6 +9,8 @@ Opens your web page in PhantomJS, compressing the HTML while taking into account
 
     asterisk --url http://www.nytimes.com/pages/technology/index.html --task minify > ./index.min.html
 
+Any inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
+
 ## Installation
 
     npm install -g asterisk
@@ -37,7 +39,7 @@ Omitting these element's closing tags is permitted, add/remove any you want to i
 These elements don't have closing tags, such as `<img src="nevergonna.png"></img>`.
 
 #### .uglify_js.* (Object)
-These values are applied to UglifyJS and are documented at https://github.com/mishoo/UglifyJS
+These values are applied to UglifyJS and are documented at [https://github.com/mishoo/UglifyJS](https://github.com/mishoo/UglifyJS)
 
 #### .uglify_js.inline_script (true)
 Since we're Uglifying JavaScript found in `<script>` blocks as opposed to external files, I wouldn't recommend changing this value.

@@ -5,7 +5,7 @@ var task = system.args[3];
 var page = require('webpage').create();
 var messagePrefix = '[ASTERISK]';
 var exitMessage = messagePrefix + ' END';
-var config = require('../config.json');
+var config = JSON.parse(system.args[4]);
 
 page.onConsoleMessage = function(msg){
   return msg === exitMessage ?
