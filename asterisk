@@ -39,15 +39,17 @@ if(program.url && program.task) {
     nodeTask = require(nodeTaskPath);
   }
 
-  if(configPath && !fs.existsSync(configPath)) {
-    console.error('Cannot find JSON config file at "' + configPath + '"');
-    hasErrors = true;
-  } else {
-    try {
-      require(configPath);
-    } catch(e) {
-      console.error('Error parsing JSON config file at "' + configPath + '"');
+  if(configPath) {
+    if(!fs.existsSync(configPath)) {
+      console.error('Cannot find JSON config file at "' + configPath + '"');
       hasErrors = true;
+    } else {
+      try {
+        require(configPath);
+      } catch(e) {
+        console.error('Error parsing JSON config file at "' + configPath + '"');
+        hasErrors = true;
+      }
     }
   }
 
