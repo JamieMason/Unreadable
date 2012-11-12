@@ -18,7 +18,7 @@ var commandToClass = {
     };
 
 program
-  .version('0.0.5')
+  .version(require('./package.json').version)
   .option('-u --url [value]', 'URL to process')
   .option('-t --task [value]', 'Task name to perform')
   .parse(process.argv);
