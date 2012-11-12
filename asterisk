@@ -53,7 +53,7 @@ if(program.url && program.task) {
 
   if (!hasErrors) {
 
-    command = 'phantomjs "__cwd__/src/asterisk.js" "__cwd__" "__url__" "__task__" "__configPath__" --web-security=no --local-to-remote-url-access=yes --load-images=no'
+    command = 'phantomjs "__cwd__/src/phantomRunner.js" "__cwd__" "__url__" "__task__" "__configPath__" --web-security=no --local-to-remote-url-access=yes --load-images=no'
       .replace(/__cwd__/g, __dirname)
       .replace(/__url__/g, program.url)
       .replace(/__task__/g, taskName)
