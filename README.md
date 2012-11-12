@@ -41,3 +41,13 @@ These values are applied to UglifyJS and are documented at https://github.com/mi
 
 #### .uglify_js.inline_script (true)
 Since we're Uglifying JavaScript found in <script> blocks as opposed to external files, I wouldn't recommend changing this value.
+
+### Your overrides JSON file
+
+Only the values you want to override need be defined, so to enable removal of optional closing tags for example - your file would look like this;
+
+    {
+      "asterisk_minify": {
+        "remove_optional_closing_tags": true
+      }
+    }
