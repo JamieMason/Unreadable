@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
+var originalDir = __dirname;
 process.chdir(process.cwd());
 
+var path = require('path');
 var program = require('commander');
 var fs = require('fs');
 var exec = require('child_process').exec;
+var configPath;
+var hasErrors = false;
 var postProcess;
 var command;
 var proc;
@@ -21,6 +25,7 @@ program
   .version(require('./package.json').version)
   .option('-u --url [value]', 'URL to process')
   .option('-t --task [value]', 'Task name to perform')
+  .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)')
   .parse(process.argv);
 
 if(program.url && program.task) {
@@ -28,23 +33,40 @@ if(program.url && program.task) {
   taskName = program.task;
   taskName = taskName in commandToClass ? commandToClass[taskName] : taskName;
   nodeTaskPath = __dirname + '/src/' + taskName + '-node.js';
+  configPath = program.config ? path.resolve(originalDir, program.config) : '';
 
   if(fs.existsSync(nodeTaskPath)) {
     nodeTask = require(nodeTaskPath);
   }
 
-  command = 'phantomjs "' + __dirname + '/src/asterisk.js" "' + __dirname + '" "' + program.url + '" "' + taskName + '" --web-security=no --local-to-remote-url-access=yes --load-images=no';
-
-  proc = exec(command, function(error, stdout, stderr) {
-
-    if(error !== null) {
-      console.error(error);
-    } else if(nodeTask) {
-      nodeTask.processBrowserOutput(stdout);
-    } else {
-      console.log(stdout);
+  if(configPath && !fs.existsSync(configPath)) {
+    console.error('Cannot find JSON config file at "' + configPath + '"');
+    hasErrors = true;
+  } else {
+    try {
+      require(configPath);
+    } catch(e) {
+      console.error('Error parsing JSON config file at "' + configPath + '"');
+      hasErrors = true;
     }
+  }
 
-  });
+  if (!hasErrors) {
 
+    command = 'phantomjs "__cwd__/src/asterisk.js" "__cwd__" "__url__" "__task__" "__configPath__" --web-security=no --local-to-remote-url-access=yes --load-images=no'
+      .replace(/__cwd__/g, __dirname)
+      .replace(/__url__/g, program.url)
+      .replace(/__task__/g, taskName)
+      .replace(/__configPath__/g, configPath);
+
+    proc = exec(command, function(error, stdout, stderr) {
+      if(error !== null) {
+        console.error(error);
+      } else if(nodeTask) {
+        nodeTask.processBrowserOutput(stdout);
+      } else {
+        console.log(stdout);
+      }
+    });
+  }
 }
