@@ -39,6 +39,9 @@ exports.processBrowserOutput = function (stdout, config) {
     });
   }
 
-  console.log(json.html.join(''));
+  return {
+    html: json.html.join(''),
+    msg: json.msg
+  };
 
 };

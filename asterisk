@@ -4,15 +4,18 @@ var originalDir = __dirname;
 process.chdir(process.cwd());
 
 var fs = require('fs');
+var path = require('path');
 var commandLine = require('commander');
 var configManager = require('./src/configManager');
 var postProcess = require('./src/server');
-var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' --web-security=no --local-to-remote-url-access=yes --load-images=no';
+var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' #{inspect} --web-security=no --local-to-remote-url-access=yes --load-images=no';
 var config;
 
 commandLine
   .version(require('./package.json').version)
   .option('-u --url [value]', 'URL to process')
+  .option('-i --inspect', 'Inspect layout for changes caused by minification')
+  .option('-o --output [value]', 'File to write minified source to')
   .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)')
   .parse(process.argv);
 
@@ -24,9 +27,20 @@ if(commandLine.url) {
   });
 
   config = configManager.getConfig();
-  command = command.split('#{cwd}').join(__dirname).split('#{url}').join(commandLine.url).split('#{config}').join(JSON.stringify(config));
+  command = command.split('#{cwd}').join(__dirname).split('#{url}').join(commandLine.url).split('#{config}').join(JSON.stringify(config)).split('#{inspect}').join(!!commandLine.inspect);
 
   require('child_process').exec(command, function(error, stdout, stderr) {
-    error === null ? postProcess.processBrowserOutput(stdout, config) : console.error(error);
+    if(error !== null) {
+      console.error(error);
+    }
+
+    var output = postProcess.processBrowserOutput(stdout, config);
+
+    if(commandLine.output) {
+      console.log(output.msg);
+      fs.writeFileSync(path.resolve('./' + commandLine.output), output.html, 'utf8');
+    } else {
+      console.log(output.html);
+    }
   });
 }

@@ -2,6 +2,7 @@ var system = require('system');
 var cwd = system.args[1];
 var url = system.args[2] || 'about:blank';
 var config = JSON.parse(system.args[3]);
+var inspect = system.args[4] === 'true';
 var page = require('webpage').create();
 var messagePrefix = '[ASTERISK]';
 var exitMessage = messagePrefix + ' END';
@@ -9,8 +10,7 @@ var exitMessage = messagePrefix + ' END';
 page.onConsoleMessage = function(msg) {
   if(msg === exitMessage) {
     phantom.exit();
-  }
-  if(~msg.indexOf(messagePrefix)) {
+  } else if(~msg.indexOf(messagePrefix)) {
     console.log(msg.replace(messagePrefix, ''));
   }
 };
@@ -29,7 +29,7 @@ page.onError = function(msg, trace) {
 
 page.open(url, function(status){
   page.injectJs('browser.js');
-  page.evaluate(function(messagePrefix, exitMessage, config){
-    asteriskMinify(messagePrefix, exitMessage, config);
-  }, messagePrefix, exitMessage, config);
+  page.evaluate(function(messagePrefix, exitMessage, config, inspect){
+    asteriskMinify(messagePrefix, exitMessage, config, inspect);
+  }, messagePrefix, exitMessage, config, inspect);
 });

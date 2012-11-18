@@ -1,7 +1,10 @@
-function asteriskMinify (messagePrefix, exitMessage, config) {
+function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
+  var correct = 0;
   var remove_optional_closing_tags = config.asterisk_minify.remove_optional_closing_tags;
   var output = [];
+  var layoutBefore = [];
+  var layoutAfter = [];
   var inlineStyles = [];
   var inlineScripts = [];
   var reClosingTagForbidden = new RegExp('^(' + config.asterisk_minify.forbidden_closing_tags.join('|') + ')$');
@@ -91,6 +94,42 @@ function asteriskMinify (messagePrefix, exitMessage, config) {
     }
   }
 
+  function inspectLayout(el, list) {
+
+    var i = 0;
+    var children = el.childNodes;
+    var len = children.length;
+    var layout = {};
+
+    if(el.nodeType === 1) {
+      layout = el.getBoundingClientRect();
+      list.push([layout.bottom, layout.height, layout.left, layout.right, layout.top, layout.width].join('-'));
+
+      if(len) {
+        while(i < len) {
+          inspectLayout(children[i++], list);
+        }
+      }
+    }
+
+  }
+
+  function verifyLayout() {
+
+    var i = 0;
+    var len = layoutBefore.length;
+    var after = '';
+
+    if(len) {
+      while(i < len) {
+        if ((after = layoutAfter[i++]) && after === layoutBefore[i]) {
+          correct++;
+        }
+      }
+    }
+
+  }
+
   function processElement(el) {
 
     var i = 0;
@@ -153,6 +192,7 @@ function asteriskMinify (messagePrefix, exitMessage, config) {
     var i = 0;
     var executableScripts = _document.querySelectorAll('script:not([type]),script[type="text/javascript"]');
     var len = executableScripts.length;
+    var root = document.documentElement;
 
     if(len) {
       while(i < len) {
@@ -160,15 +200,26 @@ function asteriskMinify (messagePrefix, exitMessage, config) {
       }
     }
 
-    document.documentElement.innerHTML = _document.documentElement.innerHTML;
+    root.innerHTML = _document.documentElement.innerHTML;
     _document = null;
     output.push(getDocType() +'\n');
-    processElement(document.documentElement);
+
+    if (inspect) {
+      inspectLayout(root, layoutBefore);
+    }
+
+    processElement(root);
+
+    if (inspect) {
+      inspectLayout(root, layoutAfter);
+      verifyLayout();
+    }
 
     console.log(messagePrefix, JSON.stringify({
       html: output,
       iScripts: inlineScripts,
-      iStyles: inlineStyles
+      iStyles: inlineStyles,
+      msg: inspect ? correct + '/' + layoutBefore.length + ' elements with layout unaffected after minification' : ''
     }));
 
     console.log(exitMessage);
