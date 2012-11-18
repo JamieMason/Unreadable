@@ -3,54 +3,30 @@
 var originalDir = __dirname;
 process.chdir(process.cwd());
 
-var program = require('commander');
 var fs = require('fs');
-var exec = require('child_process').exec;
+var commandLine = require('commander');
 var configManager = require('./src/configManager');
-var command;
-var proc;
-var taskName;
-var nodeTaskPath;
+var postProcess = require('./src/server');
+var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' --web-security=no --local-to-remote-url-access=yes --load-images=no';
 var config;
-var commandToClass = {
-      summary: 'DocumentSummary',
-      minify: 'ComputedStyleMinify'
-    };
 
-program
+commandLine
   .version(require('./package.json').version)
   .option('-u --url [value]', 'URL to process')
-  .option('-t --task [value]', 'Task name to perform')
   .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)')
   .parse(process.argv);
 
-if(program.url && program.task) {
-
-  taskName = program.task;
-  taskName = taskName in commandToClass ? commandToClass[taskName] : taskName;
-  nodeTaskPath = __dirname + '/src/' + taskName + '-node.js';
-
+if(commandLine.url) {
   configManager.init({
     executionDir: originalDir,
     binDir: __dirname,
-    program: program
+    program: commandLine
   });
 
   config = configManager.getConfig();
+  command = command.split('#{cwd}').join(__dirname).split('#{url}').join(commandLine.url).split('#{config}').join(JSON.stringify(config));
 
-  command = 'phantomjs "__cwd__/src/phantomRunner.js" "__cwd__" "__url__" "__task__" \'__config__\' --web-security=no --local-to-remote-url-access=yes --load-images=no'
-    .replace(/__cwd__/g, __dirname)
-    .replace(/__url__/g, program.url)
-    .replace(/__task__/g, taskName)
-    .replace(/__config__/g, JSON.stringify(config));
-
-  proc = exec(command, function(error, stdout, stderr) {
-    if(error !== null) {
-      console.error(error);
-    } else if(fs.existsSync(nodeTaskPath)) {
-      require(nodeTaskPath).processBrowserOutput(stdout, config);
-    } else {
-      console.log(stdout);
-    }
+  require('child_process').exec(command, function(error, stdout, stderr) {
+    error === null ? postProcess.processBrowserOutput(stdout, config) : console.error(error);
   });
 }

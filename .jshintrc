@@ -2,10 +2,8 @@
   "predef": [
     "ActiveXObject",
     "afterEach",
-    "ElementProcessor",
-    "DocumentSummary",
+    "asteriskMinify",
     "beforeEach",
-    "Class",
     "console",
     "define",
     "describe",
@@ -16,7 +14,6 @@
     "phantom",
     "runs",
     "spyOn",
-    "TreeCrawler",
     "waits",
     "waitsFor"
   ],
