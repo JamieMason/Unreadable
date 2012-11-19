@@ -33,9 +33,13 @@ exports.processBrowserOutput = function (stdout, config) {
     });
   }
 
-  if (json.iScripts.length) {
-    json.iScripts.forEach(function(lineNumber){
-      json.html[lineNumber] = minifyJs(json.html[lineNumber].replace(/^\s*<!\-\-|\/*\-\->\s*$/g, ''));
+  if(json.iScripts.length) {
+    json.iScripts.forEach(function(lineNumber) {
+      try {
+        json.html[lineNumber] = minifyJs(json.html[lineNumber].replace(/<!\-\-|\-\->/g, ''));
+      } catch(e) {
+        json.msg = json.msg + '\nCould not minify\n----------------\n' + json.html[lineNumber] + '\n----------------';
+      }
     });
   }
 
