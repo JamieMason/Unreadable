@@ -1,15 +1,18 @@
-Asterisk
-------
+## CSS-Aware HTML Minifier
 
-## Usage
+Aggressively removes whitespace from HTML; while taking into account each element's CSS properties to ensure the layout of the file is unchanged.
 
-#### CSS-aware HTML Minifier
+Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
 
-Opens your web page in PhantomJS, compressing the HTML while taking into account each Element's CSS styles.
+## In Beta
 
-    asterisk --url http://www.nytimes.com/pages/technology/index.html --task minify > ./index.min.html
+Asterisk is a young project so there are still some TODOs. All comments are stripped for example, including IE Conditional Comments (this should be implemented over the next few days).
 
-Any inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
+## Example Usage
+
+    asterisk --inspect --url http://www.nytimes.com --output nytimes.min.html
+
+> **Output:** `1558/1558 elements with layout unaffected after minification`*
 
 ## Installation
 
@@ -17,7 +20,7 @@ Any inline JavaScript and CSS are minified using [UglifyJS](https://github.com/m
 
 ## PhantomJS
 
-You'll need PhantomJS, available at [http://phantomjs.org/download.html](http://phantomjs.org/download.html).
+You'll need to [Download & Install PhantomJS](http://phantomjs.org/download.html).
 
 ## Configuration <a id="config"></a>
 
@@ -53,3 +56,5 @@ Only the values you want to override need be defined, so to enable removal of op
         "remove_optional_closing_tags": true
       }
     }
+
+\* as well as can be determined while Asterisk is still in beta - please [report any issues](https://github.com/JamieMason/Asterisk/issues/new).
