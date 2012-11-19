@@ -11,13 +11,13 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
   var reClosingTagOptional = new RegExp('^(' + config.asterisk_minify.optional_closing_tags.join('|') + ')$');
 
   function hasSensitiveWhitespace(el) {
-    var computedStyle;
-    return el && (computedStyle = getComputedStyle(el, null)) && ~(computedStyle.getPropertyValue('white-space') + '').search(/^pre/);
+    var computedStyle = window.getComputedStyle(el, null);
+    return computedStyle && computedStyle.getPropertyValue('white-space').search(/^pre/) !== -1;
   }
 
   function isInlineElement(el) {
-    var computedStyle;
-    return el && (computedStyle = getComputedStyle(el, null)) && ~(computedStyle.getPropertyValue('display') + '').search(/^inline/);
+    var computedStyle = window.getComputedStyle(el, null);
+    return computedStyle && computedStyle.getPropertyValue('display').search(/^inline/) !== -1;
   }
 
   function textNode(el) {
@@ -103,7 +103,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
     if(el.nodeType === 1) {
       layout = el.getBoundingClientRect();
-      list.push([layout.bottom, layout.height, layout.left, layout.right, layout.top, layout.width].join('-'));
+      list.push([layout.top, layout.right, layout.bottom, layout.left, layout.width, layout.height].join('-'));
 
       if(len) {
         while(i < len) {
@@ -122,9 +122,11 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
     if(len) {
       while(i < len) {
-        if ((after = layoutAfter[i++]) && after === layoutBefore[i]) {
+        after = layoutAfter[i];
+        if (after === layoutBefore[i]) {
           correct++;
         }
+        i++;
       }
     }
 
