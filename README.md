@@ -26,7 +26,7 @@ You'll need to [Download & Install PhantomJS](http://phantomjs.org/download.html
 
 To override any of Asterisk's defaults, you can point to a JSON file.
 
-    asterisk --url http://... --task minify --config path/to/my/overrides.json
+    asterisk --url http://... --config path/to/my/overrides.json
 
 ### Default Values
 
