@@ -5,6 +5,7 @@ exports.init = function(options) {
   exports.executionDir = options.executionDir;
   exports.binDir = options.binDir;
   exports.program = options.program;
+  return exports.getConfig();
 };
 
 exports.deepExtend = function(destination, source) {

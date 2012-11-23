@@ -17,9 +17,9 @@ function minifyJs(data) {
   return uglifyProcessor.gen_code(ast, uglifyConfig.gen_code);
 }
 
-exports.processBrowserOutput = function (stdout, config) {
+exports.processBrowserOutput = function (output, config) {
 
-  var json = JSON.parse(stdout);
+  var json = JSON.parse(output);
 
   uglifyConfig = config.uglify_js;
 

@@ -1,17 +1,29 @@
-var system = require('system');
-var cwd = system.args[1];
-var url = system.args[2] || 'about:blank';
-var config = JSON.parse(system.args[3]);
-var inspect = system.args[4] === 'true';
-var page = require('webpage').create();
+var fs            = require('fs');
+var system        = require('system');
+var page          = require('webpage').create();
+var cwd           = system.args[1];
+var url           = system.args[2] || 'about:blank';
+var config        = system.args[3];
+var inspect       = system.args[4] === 'true';
+var outFile       = system.args[5];
 var messagePrefix = '[ASTERISK]';
-var exitMessage = messagePrefix + ' END';
+var exitMessage   = messagePrefix + ' END';
+var stream;
+
+// create/empty file
+fs.write(outFile, '', 'w');
+
+// open file for output
+stream = fs.open(outFile, 'a');
+
+config = JSON.parse(config);
 
 page.onConsoleMessage = function(msg) {
   if(msg === exitMessage) {
     phantom.exit();
   } else if(~msg.indexOf(messagePrefix)) {
-    console.log(msg.replace(messagePrefix, ''));
+    stream.write(msg.replace(messagePrefix, ''));
+    stream.flush();
   }
 };
 

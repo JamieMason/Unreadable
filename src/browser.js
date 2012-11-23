@@ -202,8 +202,9 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       }
     }
 
-    root.innerHTML = _document.documentElement.innerHTML;
-    _document = null;
+    document.documentElement.replaceChild(_document.querySelector('head'), document.querySelector('head'));
+    document.documentElement.replaceChild(_document.querySelector('body'), document.querySelector('body'));
+
     output.push(getDocType() +'\n');
 
     if (inspect) {
