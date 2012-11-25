@@ -38,8 +38,8 @@ function onPhantomExit(error, stdout, stderr) {
   if(!error) {
     var output = fs.readFileSync(outFile, 'utf8');
     output = require('./src/server').processBrowserOutput(output, config);
-    fs.writeFileSync(outFile, output, 'utf8');
-    process.exit(0);
+    fs.writeFileSync(outFile, output.markup, 'utf8');
+    process.exit(output.isIntact ? 0 : 1);
   } else {
     console.error(error);
     process.exit(1);
