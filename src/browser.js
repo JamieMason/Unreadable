@@ -1,6 +1,6 @@
 function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
-  var correct = 0;
+  var intact = 0;
   var remove_optional_closing_tags = config.asterisk_minify.remove_optional_closing_tags;
   var output = [];
   var layoutBefore = [];
@@ -124,7 +124,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       while(i < len) {
         after = layoutAfter[i];
         if (after === layoutBefore[i]) {
-          correct++;
+          intact++;
         }
         i++;
       }
@@ -222,7 +222,8 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       html: output,
       iScripts: inlineScripts,
       iStyles: inlineStyles,
-      msg: inspect ? correct + '/' + layoutBefore.length + ' elements with layout unaffected after minification' : ''
+      count: layoutBefore.length,
+      intact: intact
     }));
 
     console.log(exitMessage);

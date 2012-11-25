@@ -1,13 +1,13 @@
-var fs            = require('fs');
-var system        = require('system');
-var page          = require('webpage').create();
-var cwd           = system.args[1];
-var url           = system.args[2] || 'about:blank';
-var config        = system.args[3];
-var inspect       = system.args[4] === 'true';
-var outFile       = system.args[5];
-var messagePrefix = '[ASTERISK]';
-var exitMessage   = messagePrefix + ' END';
+var fs             = require('fs');
+var system         = require('system');
+var phantomSession = require('webpage').create();
+var cwd            = system.args[1];
+var url            = system.args[2] || 'about:blank';
+var config         = system.args[3];
+var inspect        = system.args[4] === 'true';
+var outFile        = system.args[5];
+var messagePrefix  = '[ASTERISK]';
+var exitMessage    = messagePrefix + ' END';
 var stream;
 
 // create/empty file
@@ -18,7 +18,7 @@ stream = fs.open(outFile, 'a');
 
 config = JSON.parse(config);
 
-page.onConsoleMessage = function(msg) {
+phantomSession.onConsoleMessage = function(msg) {
   if(msg === exitMessage) {
     phantom.exit();
   } else if(~msg.indexOf(messagePrefix)) {
@@ -27,7 +27,7 @@ page.onConsoleMessage = function(msg) {
   }
 };
 
-page.onError = function(msg, trace) {
+phantomSession.onError = function(msg, trace) {
   var msgStack = ['ERROR: ' + msg];
   if (trace) {
     msgStack.push('TRACE:');
@@ -39,9 +39,9 @@ page.onError = function(msg, trace) {
   phantom.exit();
 };
 
-page.open(url, function(status){
-  page.injectJs('browser.js');
-  page.evaluate(function(messagePrefix, exitMessage, config, inspect){
+phantomSession.open(url, function(status){
+  phantomSession.injectJs('browser.js');
+  phantomSession.evaluate(function(messagePrefix, exitMessage, config, inspect){
     asteriskMinify(messagePrefix, exitMessage, config, inspect);
   }, messagePrefix, exitMessage, config, inspect);
 });

@@ -26,8 +26,7 @@ function onPhantomExit(error, stdout, stderr) {
   if(!error) {
     var output = fs.readFileSync(outFile, 'utf8');
     output = require('./src/server').processBrowserOutput(output, config);
-    console.log(output.msg || 'Output saved to ' + outFile);
-    fs.writeFileSync(outFile, output.html, 'utf8');
+    fs.writeFileSync(outFile, output, 'utf8');
   } else {
     console.error(error);
   }
