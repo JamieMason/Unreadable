@@ -14,7 +14,7 @@ Asterisk is a young project so there are still some TODOs. Currently all comment
 
 8 of the Alexa top 10 sites are working well, but 2 have issues which will be addressed soon.
 
-![terminal output](test-docs/alexatop10.png)
+![terminal output](https://raw.github.com/JamieMason/Asterisk/master/test-docs/alexatop10.png)
 
 ## Installation
 
