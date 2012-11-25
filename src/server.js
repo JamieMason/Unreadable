@@ -62,6 +62,7 @@ exports.parseOutput = function(output) {
     output = null;
   }
   if(!output) {
+    exports.failMessage(output);
     throw new Error('Invalid JSON returned from Browser');
   }
   return output;
