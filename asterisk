@@ -1,46 +1,74 @@
 #!/usr/bin/env node
 
+// store the directory we're being run from
 var originalDir = __dirname;
+
+// operate from install dir
 process.chdir(process.cwd());
 
 var fs = require('fs');
 var path = require('path');
-var commandLine = require('commander');
-var configManager = require('./src/configManager');
-var postProcess = require('./src/server');
-var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' #{inspect} --web-security=no --local-to-remote-url-access=yes --load-images=no';
+var program = require('commander');
+var server = require('./src/server');
+var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' #{inspect} #{outFile} --web-security=no --local-to-remote-url-access=yes --load-images=no';
+var outFile;
 var config;
+var timeoutId = setTimeout(function() {
+      server.failMessage('Timeout exceeded');
+      process.exit(1);
+    }, 30e3);
 
-commandLine
+// read arguments
+program
   .version(require('./package.json').version)
   .option('-u --url [value]', 'URL to process')
-  .option('-i --inspect', 'Inspect layout for changes caused by minification')
+  .option('-i --inspect', 'Inspect layout before and after, to verify no elements have changed size or position (slower)')
   .option('-o --output [value]', 'File to write minified source to')
   .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)')
   .parse(process.argv);
 
-if(commandLine.url) {
-  configManager.init({
-    executionDir: originalDir,
-    binDir: __dirname,
-    program: commandLine
-  });
-
-  config = configManager.getConfig();
-  command = command.split('#{cwd}').join(__dirname).split('#{url}').join(commandLine.url).split('#{config}').join(JSON.stringify(config)).split('#{inspect}').join(!!commandLine.inspect);
-
-  require('child_process').exec(command, function(error, stdout, stderr) {
-    if(error !== null) {
-      console.error(error);
-    }
-
-    var output = postProcess.processBrowserOutput(stdout, config);
-
-    if(commandLine.output) {
-      console.log(output.msg);
-      fs.writeFileSync(path.resolve('./' + commandLine.output), output.html, 'utf8');
-    } else {
-      console.log(output.html);
-    }
-  });
+// A URL to minify and somewhere to save it are required
+if(!program.url || !program.output) {
+  program.outputHelp();
+  process.exit(1);
 }
+
+/**
+ * When PhantomJS has finished processing the document, pass the output through other command line optimisation tools and write the HTML output.
+ * @param  {Object|Null} error
+ * @param  {String} stdout
+ * @param  {Object|Null} stderr
+ */
+function onPhantomExit(error, stdout, stderr) {
+  if(!error) {
+    clearTimeout(timeoutId);
+    var output = fs.readFileSync(outFile, 'utf8');
+    output = server.processBrowserOutput(output, config);
+    fs.writeFileSync(outFile, output.markup, 'utf8');
+    process.exit(output.isIntact ? 0 : 1);
+  } else {
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+// merge defaults, config.json and command line params
+config = require('./src/configManager').init({
+  executionDir: originalDir,
+  binDir: __dirname,
+  program: program
+});
+
+// get an absolute path to where to save the file
+outFile = path.resolve('./' + program.output);
+
+// apply config to PhantomJS process
+command = command
+  .split('#{cwd}').join(__dirname)
+  .split('#{url}').join(program.url)
+  .split('#{config}').join(JSON.stringify(config))
+  .split('#{inspect}').join(!!program.inspect)
+  .split('#{outFile}').join(outFile);
+
+// start PhantomJS
+require('child_process').exec(command, onPhantomExit);

@@ -1,8 +1,8 @@
 {
   "name": "asterisk",
-  "version": "0.0.8",
-  "description": "A CSS-aware intelligent HTML Minfier",
-  "keywords": ["command", "shell", "minify", "optimize", "compress", "performance", "html", "phantomjs"],
+  "version": "0.0.9",
+  "description": "An intelligent/CSS-aware HTML Minifier and Optimizer",
+  "keywords": ["command", "compress", "html", "minify", "optimization", "optimize", "performance", "phantomjs", "shell", "uglify"],
   "author": {
     "name": "Jamie Mason (@GotNoSugarBaby)"
   },

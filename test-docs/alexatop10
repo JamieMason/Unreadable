@@ -1,0 +1,27 @@
+#!/bin/bash
+
+cwd="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $cwd/../
+
+clear
+
+echo "Alexa #1 Google"
+./asterisk --url "http://google.com" --inspect --output "test-docs/google.min.html"
+echo "Alexa #2 Facebook"
+./asterisk --url "http://facebook.com" --inspect --output "test-docs/facebook.min.html"
+echo "Alexa #3 YouTube"
+./asterisk --url "http://youtube.com" --inspect --output "test-docs/youtube.min.html"
+echo "Alexa #4 Yahoo!"
+./asterisk --url "http://yahoo.com" --inspect --output "test-docs/yahoo.min.html"
+echo "Alexa #5 Baidu.com"
+./asterisk --url "http://baidu.com" --inspect --output "test-docs/baidu.min.html"
+echo "Alexa #6 Wikipedia"
+./asterisk --url "http://wikipedia.org" --inspect --output "test-docs/wikipedia.min.html"
+echo "Alexa #7 Windows Live"
+./asterisk --url "http://live.com" --inspect --output "test-docs/live.min.html"
+echo "Alexa #8 QQ.COM"
+./asterisk --url "http://qq.com" --inspect --output "test-docs/qq.min.html"
+echo "Alexa #9 Twitter"
+./asterisk --url "http://twitter.com" --inspect --output "test-docs/twitter.min.html"
+echo "Alexa #10 Amazon.com"
+./asterisk --url "http://amazon.com" --inspect --output "test-docs/amazon.min.html"

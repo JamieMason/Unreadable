@@ -4,15 +4,17 @@ Aggressively removes whitespace from HTML; while taking into account each elemen
 
 Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
 
-## In Beta
-
-Asterisk is a young project so there are still some TODOs. All comments are stripped for example, including IE Conditional Comments (this should be implemented over the next few days).
-
 ## Example Usage
 
     asterisk --inspect --url http://www.nytimes.com --output nytimes.min.html
 
-> **Output:** `1558/1558 elements with layout unaffected after minification`*
+## In Beta
+
+Asterisk is a young project so there are still some TODOs. Currently all comments are stripped, including IE Conditional Comments (this should be implemented over the next few days).
+
+8 of the Alexa top 10 sites are working well, but 2 have issues which will be addressed soon.
+
+![terminal output](test-docs/alexatop10.png)
 
 ## Installation
 

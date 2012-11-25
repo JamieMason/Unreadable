@@ -1,21 +1,42 @@
-var system = require('system');
-var cwd = system.args[1];
-var url = system.args[2] || 'about:blank';
-var config = JSON.parse(system.args[3]);
-var inspect = system.args[4] === 'true';
-var page = require('webpage').create();
-var messagePrefix = '[ASTERISK]';
-var exitMessage = messagePrefix + ' END';
+var fs             = require('fs');
+var system         = require('system');
+var phantomSession = require('webpage').create();
+var cwd            = system.args[1];
+var url            = system.args[2] || 'about:blank';
+var config         = system.args[3];
+var inspect        = system.args[4] === 'true';
+var outFile        = system.args[5];
+var messagePrefix  = '[ASTERISK]';
+var exitMessage    = messagePrefix + ' END';
+var stream;
 
-page.onConsoleMessage = function(msg) {
+// create/empty file
+fs.write(outFile, '', 'w');
+
+// open file for output
+stream = fs.open(outFile, 'a');
+
+config = JSON.parse(config);
+
+/**
+ * Listen for our data being returned from the browser session, write output and exit
+ * @param  {String} msg
+ */
+phantomSession.onConsoleMessage = function(msg) {
   if(msg === exitMessage) {
     phantom.exit();
   } else if(~msg.indexOf(messagePrefix)) {
-    console.log(msg.replace(messagePrefix, ''));
+    stream.write(msg.replace(messagePrefix, ''));
+    stream.flush();
   }
 };
 
-page.onError = function(msg, trace) {
+/**
+ * Listen for JavaScript errors happening in the browser, log them and exit
+ * @param  {String} msg
+ * @param  {Array} trace
+ */
+phantomSession.onError = function(msg, trace) {
   var msgStack = ['ERROR: ' + msg];
   if (trace) {
     msgStack.push('TRACE:');
@@ -27,9 +48,10 @@ page.onError = function(msg, trace) {
   phantom.exit();
 };
 
-page.open(url, function(status){
-  page.injectJs('browser.js');
-  page.evaluate(function(messagePrefix, exitMessage, config, inspect){
+// Open the URL and process it
+phantomSession.open(url, function(status){
+  phantomSession.injectJs('browser.js');
+  phantomSession.evaluate(function(messagePrefix, exitMessage, config, inspect){
     asteriskMinify(messagePrefix, exitMessage, config, inspect);
   }, messagePrefix, exitMessage, config, inspect);
 });
