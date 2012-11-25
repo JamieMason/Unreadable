@@ -56,16 +56,17 @@ exports.readStyleElements = function(output) {
  * @return {Object}
  */
 exports.parseOutput = function(output) {
+  var json;
   try {
-    output = JSON.parse(output);
+    json = JSON.parse(output);
   } catch(err) {
-    exports.failMessage(output);
-    output = null;
+    json = null;
   }
-  if(!output) {
-    throw new Error('Invalid JSON returned from Browser');
+  if(!json) {
+    exports.failMessage('Invalid JSON returned from Browser');
+    process.exit(1);
   }
-  return output;
+  return json;
 };
 
 /**
@@ -88,7 +89,9 @@ exports.successMessage = exports.report.bind(exports, 32, '✔');
  * Write a red log prefixed with a cross
  * @param  {String} msg
  */
-exports.failMessage = exports.report.bind(exports, 31, '✘');
+exports.failMessage = function(msg) {
+  exports.report(31, '✘', msg + '\n  Please report this URL via the issues page at \033[4mhttps://github.com/JamieMason/Asterisk/issues/new\033[0m');
+};
 
 /**
  * [reportOnInspection description]
@@ -100,7 +103,7 @@ exports.reportOnInspection = function(output) {
   if(exports.layoutIsIntact(output)) {
     exports.successMessage(msg);
   } else {
-    exports.failMessage(msg + '\n- Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
+    exports.failMessage(msg);
   }
 };
 
