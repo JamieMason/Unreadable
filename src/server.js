@@ -95,11 +95,11 @@ exports.failMessage = exports.report.bind(exports, 31, '✘');
  * @return {[type]}        [description]
  */
 exports.reportOnInspection = function(output) {
-  var msg = ' elements with layout unaffected after minification';
+  var msg = (output.original.length - output.html.join('').length) + ' characters removed, ' + output.count + ' elements with layout unaffected by minification';
   if(exports.layoutIsIntact(output)) {
-    exports.successMessage(output.count + msg);
+    exports.successMessage(msg);
   } else {
-    exports.failMessage(output.count + msg + '\n- Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
+    exports.failMessage(msg + '\n- Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
   }
 };
 

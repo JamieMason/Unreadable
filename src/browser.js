@@ -279,7 +279,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     xhr.onload = function(evnt) {
       var _document = document.implementation.createHTMLDocument('no-js');
       _document.documentElement.innerHTML = xhr.responseText;
-      onComplete(_document);
+      onComplete(_document, xhr.responseText);
     };
     xhr.open('GET', location.href);
     xhr.responseType = 'text';
@@ -287,11 +287,12 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
   }
 
   // begin
-  getNonJsMarkup(function(_document) {
+  getNonJsMarkup(function(_document, originalMarkup) {
     var i = 0;
     var executableScripts = _document.querySelectorAll('script:not([type]),script[type="text/javascript"]');
     var len = executableScripts.length;
     var root = document.documentElement;
+    var docType = getDocType() +'\n';
 
     if(len) {
       while(i < len) {
@@ -299,10 +300,11 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       }
     }
 
-    document.documentElement.replaceChild(_document.querySelector('head'), document.querySelector('head'));
-    document.documentElement.replaceChild(_document.querySelector('body'), document.querySelector('body'));
+    root.replaceChild(_document.querySelector('head'), document.querySelector('head'));
+    root.replaceChild(_document.querySelector('body'), document.querySelector('body'));
+    _document = null;
 
-    output.push(getDocType() +'\n');
+    output.push(docType);
 
     if (inspect) {
       inspectLayout(root, layoutBefore);
@@ -316,6 +318,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     }
 
     console.log(messagePrefix, JSON.stringify({
+      original: originalMarkup,
       html: output,
       iScripts: inlineScripts,
       iStyles: inlineStyles,
