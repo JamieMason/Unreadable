@@ -9,9 +9,14 @@ process.chdir(process.cwd());
 var fs = require('fs');
 var path = require('path');
 var program = require('commander');
+var server = require('./src/server');
 var command = 'phantomjs "#{cwd}/src/phantomRunner.js" "#{cwd}" "#{url}" \'#{config}\' #{inspect} #{outFile} --web-security=no --local-to-remote-url-access=yes --load-images=no';
 var outFile;
 var config;
+var timeoutId = setTimeout(function() {
+      server.failMessage('Timeout exceeded');
+      process.exit(1);
+    }, 30e3);
 
 // read arguments
 program
@@ -36,8 +41,9 @@ if(!program.url || !program.output) {
  */
 function onPhantomExit(error, stdout, stderr) {
   if(!error) {
+    clearTimeout(timeoutId);
     var output = fs.readFileSync(outFile, 'utf8');
-    output = require('./src/server').processBrowserOutput(output, config);
+    output = server.processBrowserOutput(output, config);
     fs.writeFileSync(outFile, output.markup, 'utf8');
     process.exit(output.isIntact ? 0 : 1);
   } else {
