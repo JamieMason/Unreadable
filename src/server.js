@@ -3,6 +3,11 @@ var uglify = require('uglify-js');
 var uglifyProcessor = uglify.uglify;
 var uglifyConfig;
 
+/**
+ * Run JavaScript source code through Uglify-JS
+ * @param  {String} jsCode
+ * @return {String}
+ */
 exports.minifyJs = function(jsCode) {
   var ast = uglify.parser.parse(jsCode, uglifyConfig.strict_semicolons);
   if(uglifyConfig.lift_variables) {
@@ -17,7 +22,12 @@ exports.minifyJs = function(jsCode) {
   return uglifyProcessor.gen_code(ast, uglifyConfig.gen_code);
 };
 
-exports.minifyInlineJs = function(output) {
+/**
+ * Iterate over each `<script>` element containing inline source code
+ * @param  {Object} output
+ * @return {Object}
+ */
+exports.readScriptElements = function(output) {
   output.iScripts.forEach(function(lineNumber) {
     try {
       output.html[lineNumber] = exports.minifyJs(output.html[lineNumber].replace(/<!\-\-|\-\->/g, ''));
@@ -28,13 +38,23 @@ exports.minifyInlineJs = function(output) {
   return output;
 };
 
-exports.minifyInlineCss = function(output) {
+/**
+ * Iterate over each `<style>` element containing inline source code
+ * @param  {Object} output
+ * @return {Object}
+ */
+exports.readStyleElements = function(output) {
   output.iStyles.forEach(function(lineNumber) {
     output.html[lineNumber] = cleanCSS.process(output.html[lineNumber]);
   });
   return output;
 };
 
+/**
+ * A defensive wrapper for JSON.parse of the output returned by PhantomJS
+ * @param  {String} output
+ * @return {Object}
+ */
 exports.parseOutput = function(output) {
   try {
     output = JSON.parse(output);
@@ -47,25 +67,74 @@ exports.parseOutput = function(output) {
   return output;
 };
 
+/**
+ * Write a coloured log with a symbol and message
+ * @param  {Number} colour  ANSI colour code
+ * @param  {String} symbol  Prefix message with a symbol
+ * @param  {String} msg
+ */
+exports.report = function(colour, symbol, msg) {
+  console.log('\u001b[0;' + colour + 'm' + symbol + ' ' + msg + '\u001b[0;0m');
+};
+
+/**
+ * Write a green log prefixed with a tick symbol
+ * @param  {String} msg
+ */
+exports.successMessage = exports.report.bind(exports, 32, '✔');
+
+/**
+ * Write a red log prefixed with a cross
+ * @param  {String} msg
+ */
+exports.failMessage = exports.report.bind(exports, 31, '✘');
+
+/**
+ * [reportOnInspection description]
+ * @param  {[type]} output [description]
+ * @return {[type]}        [description]
+ */
+exports.reportOnInspection = function(output) {
+  var msg = ' elements with layout unaffected after minification';
+  if(exports.layoutIsIntact(output)) {
+    exports.successMessage(output.count + msg);
+  } else {
+    exports.failMessage(output.count + msg + '\n- Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
+  }
+};
+
+/**
+ * Was --inspect set when running this session?
+ * @param  {Object} output
+ * @return {Boolean}
+ */
+exports.inspectionWasTaken = function(output) {
+  return output.count > 0;
+};
+
+/**
+ * Is the size and position of every element identical as before we processed it?
+ * @param  {Object} output
+ * @return {Boolean}
+ */
+exports.layoutIsIntact = function(output) {
+  return output.count > 0 && output.count === output.intact;
+};
+
+/**
+ * When PhantomJS has finished, run further optimisations on the source and return the markup
+ * @param  {String} output
+ * @param  {Object} config
+ * @return {Object}
+ */
 exports.processBrowserOutput = function(output, config) {
   uglifyConfig = config.uglify_js;
-  output = exports.minifyInlineCss(exports.minifyInlineJs(exports.parseOutput(output)));
-
-  var isIntact = true;
-  var markup = output.html.join('');
-
-  if(output.count > 0){
-    if(output.count === output.intact){
-      console.log('\u001b[0;32m' + '✔ ' + output.count + ' elements with layout unaffected after minification' + '\u001b[0;0m');
-    } else {
-      console.log('\u001b[0;31m' + '✘ ' + output.count + ' elements with layout unaffected after minification' + '\u001b[0;0m');
-      console.log('Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
-      isIntact = false;
-    }
+  output = exports.readStyleElements(exports.readScriptElements(exports.parseOutput(output)));
+  if(exports.inspectionWasTaken(output)) {
+    exports.reportOnInspection(output);
   }
-
   return {
-    isIntact: isIntact,
-    markup: markup
+    isIntact: !exports.inspectionWasTaken(output) || exports.layoutIsIntact(output),
+    markup: output.html.join('')
   };
 };

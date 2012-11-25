@@ -18,6 +18,10 @@ stream = fs.open(outFile, 'a');
 
 config = JSON.parse(config);
 
+/**
+ * Listen for our data being returned from the browser session, write output and exit
+ * @param  {String} msg
+ */
 phantomSession.onConsoleMessage = function(msg) {
   if(msg === exitMessage) {
     phantom.exit();
@@ -27,6 +31,11 @@ phantomSession.onConsoleMessage = function(msg) {
   }
 };
 
+/**
+ * Listen for JavaScript errors happening in the browser, log them and exit
+ * @param  {String} msg
+ * @param  {Array} trace
+ */
 phantomSession.onError = function(msg, trace) {
   var msgStack = ['ERROR: ' + msg];
   if (trace) {
@@ -39,6 +48,7 @@ phantomSession.onError = function(msg, trace) {
   phantom.exit();
 };
 
+// Open the URL and process it
 phantomSession.open(url, function(status){
   phantomSession.injectJs('browser.js');
   phantomSession.evaluate(function(messagePrefix, exitMessage, config, inspect){

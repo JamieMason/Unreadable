@@ -1,25 +1,90 @@
+/**
+ * Minify the current Document
+ * @param  {String}   messagePrefix  Asterisk's namespace for console.log, so any logged by the site are ignored
+ * @param  {String}   exitMessage    Log message to instruct PhantomJS to exit
+ * @param  {Object}   config         Merged defaults.json and config.json
+ * @param  {Boolean}  inspect        Whether to inspect layout information before and after minification
+ */
 function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
+  /**
+   * If --inspect is set, how many elements have unchanged layout
+   * @type {Number}
+   */
   var intact = 0;
+
+  /**
+   * Whether to strip eg </li>
+   * @type {Boolean}
+   */
   var remove_optional_closing_tags = config.asterisk_minify.remove_optional_closing_tags;
+
+  /**
+   * All tags and text
+   * @type {String[]}
+   */
   var output = [];
+
+  /**
+   * The size and position of all elements before minification
+   * @type {Object[]}
+   */
   var layoutBefore = [];
+
+  /**
+   * The size and position of all elements after minification
+   * @type {Object[]}
+   */
   var layoutAfter = [];
+
+  /**
+   * Array indexes of the contents of `<style>` elements within `output`
+   * @type {Number[]}
+   */
   var inlineStyles = [];
+
+  /**
+   * Array indexes of the contents of `<script>` elements within `output`
+   * @type {Number[]}
+   */
   var inlineScripts = [];
+
+  /**
+   * Match element names with no closing tags
+   * @type {RegExp}
+   */
   var reClosingTagForbidden = new RegExp('^(' + config.asterisk_minify.forbidden_closing_tags.join('|') + ')$');
+
+  /**
+   * Match element names with optional closing tags
+   * @type {RegExp}
+   */
   var reClosingTagOptional = new RegExp('^(' + config.asterisk_minify.optional_closing_tags.join('|') + ')$');
 
+  /**
+   * Is the whitespace of this element significant? eg `<pre>` or `<code>` elements, or anything styled as such
+   * @param  {HTMLElement}  el
+   * @return {Boolean}
+   */
   function hasSensitiveWhitespace(el) {
     var computedStyle = window.getComputedStyle(el, null);
     return computedStyle && computedStyle.getPropertyValue('white-space').search(/^pre/) !== -1;
   }
 
+  /**
+   * Is this an inline or inline-block element? eg `<span>`, `<a>` elements, or anything styled as such
+   * @param  {HTMLElement}  el
+   * @return {Boolean}
+   */
   function isInlineElement(el) {
     var computedStyle = window.getComputedStyle(el, null);
     return computedStyle && computedStyle.getPropertyValue('display').search(/^inline/) !== -1;
   }
 
+  /**
+   * Trim whitespace from this text node, providing it won't affect the layout of it's sibling elements
+   * @param  {HTMLElement}  el
+   */
   function textNode(el) {
     var text = el.nodeValue;
 
@@ -38,6 +103,11 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     output.push(text);
   }
 
+  /**
+   * Gather the source code for the opening tag of this element
+   * @param  {HTMLElement} el
+   * @param  {String} nodeName
+   */
   function elementNodeOpen(el, nodeName) {
 
     var i = 0;
@@ -88,12 +158,22 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
   }
 
+  /**
+   * Gather the source code for the closing tag of this element
+   * @param  {HTMLElement} el
+   * @param  {String} nodeName
+   */
   function elementNodeClose(el, nodeName) {
     if(!~nodeName.search(reClosingTagForbidden) || (remove_optional_closing_tags && ~nodeName.search(reClosingTagOptional))) {
       output.push('</' + nodeName + '>');
     }
   }
 
+  /**
+   * Add to list, the size and position of element and it's descendants
+   * @param  {HTMLElement} el
+   * @param  {Object[]} list
+   */
   function inspectLayout(el, list) {
 
     var i = 0;
@@ -114,6 +194,9 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
   }
 
+  /**
+   * Compare the results of {@link inspectLayout} taken before and after minification
+   */
   function verifyLayout() {
 
     var i = 0;
@@ -132,6 +215,10 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
   }
 
+  /**
+   * Recursively process element and it's descendants
+   * @param  {HTMLElement} el
+   */
   function processElement(el) {
 
     var i = 0;
@@ -155,6 +242,10 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
   }
 
+  /**
+   * Get the markup for the type declaration for this document
+   * @return {String}
+   */
   function getDocType() {
     var element = document.doctype || {
       name: 'html'
@@ -178,6 +269,11 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     return '<!DOCTYPE ' + element.name + extra + '>';
   }
 
+  /**
+   * Since we need JavaScript enabled to process the document, other scripts will be enabled that can modify the document.
+   * We need to re-request the original source code to do minify a document which is appropriate for use.
+   * @param  {Function} onComplete  Passed an HTMLDocument
+   */
   function getNonJsMarkup(onComplete) {
     var xhr = new XMLHttpRequest();
     xhr.onload = function(evnt) {
@@ -190,6 +286,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     xhr.send();
   }
 
+  // begin
   getNonJsMarkup(function(_document) {
     var i = 0;
     var executableScripts = _document.querySelectorAll('script:not([type]),script[type="text/javascript"]');
