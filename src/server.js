@@ -50,13 +50,22 @@ exports.parseOutput = function(output) {
 exports.processBrowserOutput = function(output, config) {
   uglifyConfig = config.uglify_js;
   output = exports.minifyInlineCss(exports.minifyInlineJs(exports.parseOutput(output)));
+
+  var isIntact = true;
+  var markup = output.html.join('');
+
   if(output.count > 0){
     if(output.count === output.intact){
       console.log('\u001b[0;32m' + '✔ ' + output.count + ' elements with layout unaffected after minification' + '\u001b[0;0m');
     } else {
       console.log('\u001b[0;31m' + '✘ ' + output.count + ' elements with layout unaffected after minification' + '\u001b[0;0m');
       console.log('Please report the issue with this URL via the issues page at https://github.com/JamieMason/Asterisk/issues/new');
+      isIntact = false;
     }
   }
-  return output.html.join('');
+
+  return {
+    isIntact: isIntact,
+    markup: markup
+  };
 };
