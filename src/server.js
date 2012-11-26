@@ -99,7 +99,7 @@ exports.failMessage = function(msg) {
  * @return {[type]}        [description]
  */
 exports.reportOnInspection = function(output) {
-  var msg = (output.original.length - output.html.join('').length) + ' characters removed, ' + output.count + ' elements with layout unaffected by minification';
+  var msg = (output.original.length - output.html.join('').length) + ' characters removed, ' + output.intact + '/' + output.count + ' elements with layout unaffected by minification';
   if(exports.layoutIsIntact(output)) {
     exports.successMessage(msg);
   } else {
