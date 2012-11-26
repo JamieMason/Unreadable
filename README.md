@@ -1,26 +1,18 @@
-## CSS-Aware HTML Minifier
+# CSS-Aware HTML Minifier
 
 Aggressively removes whitespace from HTML; while taking into account each element's CSS properties to ensure the layout of the file is unchanged.
 
 Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
 
-## Example Usage
+Please note Asterisk is a young project so there are still some issues and TODOs.
+
+## Usage
 
     asterisk --inspect --url http://www.nytimes.com --output nytimes.min.html
-
-## In Beta
-
-Asterisk is a young project so there are still some TODOs. Currently all comments are stripped, including IE Conditional Comments (this should be implemented over the next few days).
-
-8 of the Alexa top 10 sites are working well, but 2 have issues which will be addressed soon.
-
-![terminal output](https://raw.github.com/JamieMason/Asterisk/master/test-docs/alexatop10.png)
 
 ## Installation
 
     npm install -g asterisk
-
-## PhantomJS
 
 You'll need to [Download & Install PhantomJS](http://phantomjs.org/download.html).
 
