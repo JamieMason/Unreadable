@@ -222,6 +222,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     var len = children.length;
     var isElementNode = el.nodeType === 1;
     var isTextNode = el.nodeType === 3;
+    var isCommentNode = el.nodeType === 8;
     var nodeName = el.nodeName.toLowerCase();
 
     if(isElementNode) {
@@ -234,6 +235,8 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       elementNodeClose(el, nodeName);
     } else if(isTextNode) {
       textNode(el);
+    } else if(isCommentNode && el.nodeValue.indexOf('[if') !== -1) {
+      output.push('<!--' + el.nodeValue + '-->');
     }
 
   }
