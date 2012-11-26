@@ -35,7 +35,7 @@ To override any of Asterisk's defaults, you can point to a JSON file.
 All default values can be seen in [defaults.json](https://github.com/JamieMason/Asterisk/blob/master/defaults.json) but here are the key ones;
 
 #### remove_optional_closing_tags (false)
-Some element's closing tags can be omitted, resulting in a much smaller file. But, doing so can affect layout (http://jsfiddle.net/csswizardry/UMYZs/) so this disabled by default.
+Some element's closing tags can be omitted, resulting in a much smaller file. But, doing so can affect layout (http://jsfiddle.net/csswizardry/UMYZs/) so this is disabled by default.
 
 #### .optional_closing_tags (String[])
 Omitting these element's closing tags is permitted, add/remove any you want to include/exclude as preferred.
@@ -58,5 +58,3 @@ Only the values you want to override need be defined, so to enable removal of op
         "remove_optional_closing_tags": true
       }
     }
-
-\* as well as can be determined while Asterisk is still in beta - please [report any issues](https://github.com/JamieMason/Asterisk/issues/new).
