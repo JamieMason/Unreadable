@@ -1,6 +1,6 @@
 {
   "name": "asterisk",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "An intelligent/CSS-aware HTML Minifier and Optimizer",
   "keywords": ["command", "compress", "html", "minify", "optimization", "optimize", "performance", "phantomjs", "shell", "uglify"],
   "author": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "clean-css": ">= 0.8.x",
     "commander": ">= 1.0.5",
-    "uglify-js": ">= 1.3.4"
+    "uglify-js": "1.3.4"
   },
   "engines": {
     "node": ">= 0.8.x"

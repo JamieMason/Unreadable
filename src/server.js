@@ -1,5 +1,5 @@
 var cleanCSS = require('clean-css');
-var uglify = require('uglify-js');
+var uglify = require('../node_modules/uglify-js');
 var uglifyProcessor = uglify.uglify;
 var uglifyConfig;
 
@@ -32,7 +32,7 @@ exports.readScriptElements = function(output) {
     try {
       output.html[lineNumber] = exports.minifyJs(output.html[lineNumber].replace(/<!\-\-|\-\->/g, ''));
     } catch(e) {
-      output.msg = output.msg + '\nCould not minify\n----------------\n' + output.html[lineNumber] + '\n----------------';
+      exports.failMessage('Could not minify script at line ' + lineNumber);
     }
   });
   return output;
