@@ -117,6 +117,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     var attr;
     var attrName;
     var attrValue;
+    var reJsType = / *type=(asterisk\/ignore|text\/javascript)/;
 
     if(len) {
       while(i < len) {
@@ -141,17 +142,12 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     if(nodeName === 'style') {
       inlineStyles.push(output.length + 1);
     } else if(nodeName === 'script') {
-
-      // @FIXME scripts in the head are not having their @types processed correctly
-      if(~el.type.search(/^(asterisk\/ignore|text\/javascript)/)) {
-        attrs = attrs.replace(' ' + el.type, '');
-        el.type = '';
+      if(~attrs.search(reJsType)) {
+        attrs = attrs.replace(reJsType, '');
+        if(!el.src) {
+          inlineScripts.push(output.length + 1);
+        }
       }
-
-      if(!el.src && !el.type) {
-        inlineScripts.push(output.length + 1);
-      }
-
     }
 
     output.push(attrs ? ('<' + nodeName + ' ' + attrs + '>') : '<' + nodeName + '>');
