@@ -29,10 +29,14 @@ exports.minifyJs = function(jsCode) {
  */
 exports.readScriptElements = function(output) {
   output.iScripts.forEach(function(lineNumber) {
+    for (var i = lineNumber + 1; output.html[i] !== '</script>'; i++) {
+      output.html[lineNumber] = output.html[lineNumber] + output.html[i];
+      output.html[i] = '';
+    }
     try {
       output.html[lineNumber] = exports.minifyJs(output.html[lineNumber].replace(/<!\-\-|\-\->/g, ''));
     } catch(e) {
-      exports.failMessage('Could not minify script at line ' + lineNumber);
+      exports.failMessage('Some scripts could not be minified');
     }
   });
   return output;
@@ -99,7 +103,7 @@ exports.failMessage = function(msg) {
  * @return {[type]}        [description]
  */
 exports.reportOnInspection = function(output) {
-  var msg = (output.original.length - output.html.join('').length) + ' characters removed, ' + output.intact + '/' + output.count + ' elements with layout unaffected by minification';
+  var msg = (output.contentLength.before - output.contentLength.after) + ' characters removed, ' + output.intact + '/' + output.count + ' elements with layout unaffected by minification';
   if(exports.layoutIsIntact(output)) {
     exports.successMessage(msg);
   } else {

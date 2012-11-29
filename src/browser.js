@@ -258,7 +258,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     xhr.onload = function(evnt) {
       var _document = document.implementation.createHTMLDocument('no-js');
       _document.documentElement.innerHTML = xhr.responseText;
-      onComplete(_document, xhr.responseText);
+      onComplete(_document, xhr.responseText.length);
     };
     xhr.open('GET', location.href);
     xhr.responseType = 'text';
@@ -266,7 +266,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
   }
 
   // begin
-  getNonJsMarkup(function(_document, originalMarkup) {
+  getNonJsMarkup(function(_document, contentLength) {
     var i = 0;
     var executableScripts = _document.querySelectorAll('script:not([type]),script[type="text/javascript"]');
     var len = executableScripts.length;
@@ -298,7 +298,10 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     }
 
     console.log(messagePrefix, JSON.stringify({
-      original: originalMarkup,
+      contentLength: {
+        before: contentLength,
+        after: output.join('').length
+      },
       html: output,
       iScripts: inlineScripts,
       iStyles: inlineStyles,
