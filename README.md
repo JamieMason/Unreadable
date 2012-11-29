@@ -6,9 +6,16 @@ Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/misho
 
 Please note Asterisk is a young project so there are still some issues and TODOs.
 
+![asterisk --inspect --url http://www.youtube.com --output youtube.min.html](static/screenshot.png)
+
 ## Usage
 
-    asterisk --inspect --url http://www.nytimes.com --output nytimes.min.html
+    -h, --help           output usage information
+    -V, --version        output the version number
+    -u --url [value]     URL to process
+    -i --inspect         Inspect layout before and after, to verify no elements have changed size or position (slower)
+    -o --output [value]  File to write minified source to
+    -c --config [value]  Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)
 
 ## Installation
 
@@ -18,30 +25,9 @@ You'll need to [Download & Install PhantomJS](http://phantomjs.org/download.html
 
 ## Configuration <a id="config"></a>
 
-To override any of Asterisk's defaults, you can point to a JSON file.
+You can override any of [Asterisk's defaults](https://github.com/JamieMason/Asterisk/blob/master/defaults.json) by providing a path to a JSON file.
 
-    asterisk --url http://... --config path/to/my/overrides.json
-
-### Default Values
-
-All default values can be seen in [defaults.json](https://github.com/JamieMason/Asterisk/blob/master/defaults.json) but here are the key ones;
-
-#### remove_optional_closing_tags (false)
-Some element's closing tags can be omitted, resulting in a much smaller file. But, doing so can affect layout (http://jsfiddle.net/csswizardry/UMYZs/) so this is disabled by default.
-
-#### .optional_closing_tags (String[])
-Omitting these element's closing tags is permitted, add/remove any you want to include/exclude as preferred.
-
-#### .forbidden_closing_tags (String[])
-These elements don't have closing tags, such as `<img src="nevergonna.png"></img>`.
-
-#### .uglify_js.* (Object)
-These values are applied to UglifyJS and are documented at [https://github.com/mishoo/UglifyJS](https://github.com/mishoo/UglifyJS)
-
-#### .uglify_js.inline_script (true)
-Since we're Uglifying JavaScript found in `<script>` blocks as opposed to external files, I wouldn't recommend changing this value.
-
-### Your overrides JSON file
+    asterisk --url http://... --config path/to/my/asterisk.json
 
 Only the values you want to override need be defined, so to enable removal of optional closing tags for example - your file would look like this;
 
@@ -50,3 +36,23 @@ Only the values you want to override need be defined, so to enable removal of op
         "remove_optional_closing_tags": true
       }
     }
+
+### Defaults
+
+All default values can be found in [defaults.json](https://github.com/JamieMason/Asterisk/blob/master/defaults.json), but here are the key ones;
+
++ #### remove_optional_closing_tags (false)
+Some element's closing tags can be omitted, resulting in a much smaller file. But, doing so can affect layout (http://jsfiddle.net/csswizardry/UMYZs/) so this is disabled by default.
+
++ #### .optional_closing_tags (String[])
+Omitting these element's closing tags is permitted, add/remove any you want to include/exclude as preferred.
+
++ #### .forbidden_closing_tags (String[])
+These elements don't have closing tags, such as `<img src="nevergonna.png"></img>`.
+
++ #### .uglify_js.* (Object)
+These values are applied to UglifyJS and are documented at [https://github.com/mishoo/UglifyJS](https://github.com/mishoo/UglifyJS)
+
++ #### .uglify_js.inline_script (true)
+Since we're Uglifying JavaScript found in `<script>` blocks as opposed to external files, I wouldn't recommend changing this value.
+
