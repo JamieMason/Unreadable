@@ -6,7 +6,7 @@ Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/misho
 
 Please note Asterisk is a young project so there are still some issues and TODOs.
 
-![asterisk --inspect --url http://www.youtube.com --output youtube.min.html](static/screenshot.png)
+![asterisk --inspect --url http://www.youtube.com --output youtube.min.html](https://raw.github.com/JamieMason/Asterisk/master/static/screenshot.png)
 
 ## Usage
 
