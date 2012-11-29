@@ -223,6 +223,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     var isElementNode = el.nodeType === 1;
     var isTextNode = el.nodeType === 3;
     var isCommentNode = el.nodeType === 8;
+    var isDocumentNode = el.nodeType === 9;
     var nodeName = el.nodeName.toLowerCase();
 
     if(isElementNode) {
@@ -237,35 +238,14 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       textNode(el);
     } else if(isCommentNode && el.nodeValue.indexOf('[if') !== -1) {
       output.push('<!--' + el.nodeValue + '-->');
+    } else if(isDocumentNode) {
+      if(len) {
+        while(i < len) {
+          processElement(children[i++]);
+        }
+      }
     }
 
-  }
-
-  /**
-   * Get the markup for the type declaration for this document
-   * @return {String}
-   */
-  function getDocType() {
-    var element = document.doctype || {
-      name: 'html'
-    };
-    var publicId = element.publicId;
-    var systemId = element.systemId;
-    var extra = '';
-
-    if(publicId) {
-      extra = extra + ' PUBLIC ' + publicId;
-    }
-
-    if(!publicId && systemId) {
-      extra = extra + ' SYSTEM';
-    }
-
-    if(systemId) {
-      extra = extra + ' ' + systemId;
-    }
-
-    return '<!DOCTYPE ' + element.name + extra + '>';
   }
 
   /**
@@ -290,8 +270,6 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     var i = 0;
     var executableScripts = _document.querySelectorAll('script:not([type]),script[type="text/javascript"]');
     var len = executableScripts.length;
-    var root = document.documentElement;
-    var docType = getDocType() +'\n';
 
     if(len) {
       while(i < len) {
@@ -299,20 +277,23 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
       }
     }
 
-    root.replaceChild(_document.querySelector('head'), document.querySelector('head'));
-    root.replaceChild(_document.querySelector('body'), document.querySelector('body'));
+    Array.prototype.slice.call(_document.documentElement.childNodes).forEach(function(child) {
+      if(child.nodeName !== 'HEAD' && child.nodeName !== 'BODY') {
+        child.parentNode.removeChild(child);
+      }
+    });
+
+    document.replaceChild(_document.documentElement, document.documentElement);
     _document = null;
 
-    output.push(docType);
-
     if (inspect) {
-      inspectLayout(root, layoutBefore);
+      inspectLayout(document.documentElement, layoutBefore);
     }
 
-    processElement(root);
+    processElement(document);
 
     if (inspect) {
-      inspectLayout(root, layoutAfter);
+      inspectLayout(document.documentElement, layoutAfter);
       verifyLayout();
     }
 
