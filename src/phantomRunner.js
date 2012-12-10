@@ -6,7 +6,7 @@ var url            = system.args[2] || 'about:blank';
 var config         = system.args[3];
 var inspect        = system.args[4] === 'true';
 var outFile        = system.args[5];
-var messagePrefix  = '[ASTERISK]';
+var messagePrefix  = '[UNREADABLE]';
 var exitMessage    = messagePrefix + ' END';
 var stream;
 
@@ -52,6 +52,6 @@ phantomSession.onError = function(msg, trace) {
 phantomSession.open(url, function(status){
   phantomSession.injectJs('browser.js');
   phantomSession.evaluate(function(messagePrefix, exitMessage, config, inspect){
-    asteriskMinify(messagePrefix, exitMessage, config, inspect);
+    unreadableMinify(messagePrefix, exitMessage, config, inspect);
   }, messagePrefix, exitMessage, config, inspect);
 });

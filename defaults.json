@@ -1,5 +1,5 @@
 {
-  "asterisk_minify": {
+  "unreadable": {
     "remove_optional_closing_tags": false,
     "optional_closing_tags": ["body", "colgroup", "dd", "dt", "head", "html", "li", "option", "tbody", "td", "tfoot", "th", "thead", "tr"],
     "forbidden_closing_tags": ["area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"]

@@ -1,11 +1,11 @@
 /**
  * Minify the current Document
- * @param  {String}   messagePrefix  Asterisk's namespace for console.log, so any logged by the site are ignored
+ * @param  {String}   messagePrefix  Unreadable's namespace for console.log, so any logged by the site are ignored
  * @param  {String}   exitMessage    Log message to instruct PhantomJS to exit
  * @param  {Object}   config         Merged defaults.json and config.json
  * @param  {Boolean}  inspect        Whether to inspect layout information before and after minification
  */
-function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
+function unreadableMinify (messagePrefix, exitMessage, config, inspect) {
 
   /**
    * If --inspect is set, how many elements have unchanged layout
@@ -17,7 +17,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
    * Whether to strip eg </li>
    * @type {Boolean}
    */
-  var remove_optional_closing_tags = config.asterisk_minify.remove_optional_closing_tags;
+  var remove_optional_closing_tags = config.unreadable.remove_optional_closing_tags;
 
   /**
    * All tags and text
@@ -53,13 +53,13 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
    * Match element names with no closing tags
    * @type {RegExp}
    */
-  var reClosingTagForbidden = new RegExp('^(' + config.asterisk_minify.forbidden_closing_tags.join('|') + ')$');
+  var reClosingTagForbidden = new RegExp('^(' + config.unreadable.forbidden_closing_tags.join('|') + ')$');
 
   /**
    * Match element names with optional closing tags
    * @type {RegExp}
    */
-  var reClosingTagOptional = new RegExp('^(' + config.asterisk_minify.optional_closing_tags.join('|') + ')$');
+  var reClosingTagOptional = new RegExp('^(' + config.unreadable.optional_closing_tags.join('|') + ')$');
 
   /**
    * Is the whitespace of this element significant? eg `<pre>` or `<code>` elements, or anything styled as such
@@ -117,7 +117,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
     var attr;
     var attrName;
     var attrValue;
-    var reJsType = / *type=(asterisk\/ignore|text\/javascript)/;
+    var reJsType = / *type=(unreadable\/ignore|text\/javascript)/;
 
     if(len) {
       while(i < len) {
@@ -273,7 +273,7 @@ function asteriskMinify (messagePrefix, exitMessage, config, inspect) {
 
     if(len) {
       while(i < len) {
-        executableScripts[i++].type = 'asterisk/ignore';
+        executableScripts[i++].type = 'unreadable/ignore';
       }
     }
 

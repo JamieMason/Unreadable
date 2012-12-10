@@ -94,7 +94,7 @@ exports.successMessage = exports.report.bind(exports, 32, '✔');
  * @param  {String} msg
  */
 exports.failMessage = function(msg) {
-  exports.report(31, '✘', msg + '\n  Please report this URL via the issues page at \033[4mhttps://github.com/JamieMason/Asterisk/issues/new\033[0m');
+  exports.report(31, '✘', msg + '\n  Please report this URL via the issues page at \033[4mhttps://github.com/JamieMason/Unreadable/issues/new\033[0m');
 };
 
 /**

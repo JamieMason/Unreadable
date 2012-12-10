@@ -24,7 +24,7 @@ program
   .option('-u --url [value]', 'URL to process')
   .option('-i --inspect', 'Inspect layout before and after, to verify no elements have changed size or position (slower)')
   .option('-o --output [value]', 'File to write minified source to')
-  .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)')
+  .option('-c --config [value]', 'Path to JSON configuration file (see https://github.com/JamieMason/Unreadable#config)')
   .parse(process.argv);
 
 // A URL to minify and somewhere to save it are required

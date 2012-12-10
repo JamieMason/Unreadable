@@ -1,5 +1,5 @@
 {
-  "name": "asterisk",
+  "name": "unreadable",
   "version": "0.0.13",
   "description": "An intelligent/CSS-aware HTML Minifier and Optimizer",
   "keywords": ["command", "compress", "html", "minify", "optimization", "optimize", "performance", "phantomjs", "shell", "uglify"],
@@ -7,11 +7,11 @@
     "name": "Jamie Mason (@GotNoSugarBaby)"
   },
   "bin": {
-    "asterisk": "./asterisk"
+    "unreadable": "./unreadable"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/JamieMason/Asterisk"
+    "url": "https://github.com/JamieMason/Unreadable"
   },
   "dependencies": {
     "clean-css": ">= 0.8.x",

@@ -4,9 +4,9 @@ Aggressively removes whitespace from HTML; while taking into account each elemen
 
 Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
 
-Please note Asterisk is a young project so there are still some issues and TODOs.
+Please note Unreadable is a young project so there are still some issues and TODOs.
 
-![asterisk --inspect --url http://www.youtube.com --output youtube.min.html](https://raw.github.com/JamieMason/Asterisk/master/static/screenshot.png)
+![unreadable --inspect --url http://www.youtube.com --output youtube.min.html](https://raw.github.com/JamieMason/Unreadable/master/static/screenshot.png)
 
 ## Usage
 
@@ -15,31 +15,31 @@ Please note Asterisk is a young project so there are still some issues and TODOs
     -u --url [value]     URL to process
     -i --inspect         Inspect layout before and after, to verify no elements have changed size or position (slower)
     -o --output [value]  File to write minified source to
-    -c --config [value]  Path to JSON configuration file (see https://github.com/JamieMason/Asterisk#config)
+    -c --config [value]  Path to JSON configuration file (see https://github.com/JamieMason/Unreadable#config)
 
 ## Installation
 
-    npm install -g asterisk
+    npm install -g unreadable
 
 You'll need to [Download & Install PhantomJS](http://phantomjs.org/download.html).
 
 ## Configuration <a id="config"></a>
 
-You can override any of [Asterisk's defaults](https://github.com/JamieMason/Asterisk/blob/master/defaults.json) by providing a path to a JSON file.
+You can override any of [Unreadable's defaults](https://github.com/JamieMason/Unreadable/blob/master/defaults.json) by providing a path to a JSON file.
 
-    asterisk --url http://... --config path/to/my/asterisk.json
+    unreadable --url http://... --config path/to/my/unreadable.json
 
 Only the values you want to override need be defined, so to enable removal of optional closing tags for example - your file would look like this;
 
     {
-      "asterisk_minify": {
+      "unreadable": {
         "remove_optional_closing_tags": true
       }
     }
 
 ### Defaults
 
-All default values can be found in [defaults.json](https://github.com/JamieMason/Asterisk/blob/master/defaults.json), but here are the key ones;
+All default values can be found in [defaults.json](https://github.com/JamieMason/Unreadable/blob/master/defaults.json), but here are the key ones;
 
 + #### remove_optional_closing_tags (false)
 Some element's closing tags can be omitted, resulting in a much smaller file. But, doing so can affect layout (http://jsfiddle.net/csswizardry/UMYZs/) so this is disabled by default.
