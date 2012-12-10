@@ -160,9 +160,16 @@ function unreadableMinify (messagePrefix, exitMessage, config, inspect) {
    * @param  {String} nodeName
    */
   function elementNodeClose(el, nodeName) {
-    if(!~nodeName.search(reClosingTagForbidden) || (remove_optional_closing_tags && ~nodeName.search(reClosingTagOptional))) {
-      output.push('</' + nodeName + '>');
+
+    if(~nodeName.search(reClosingTagForbidden)) {
+      return;
     }
+
+    if(remove_optional_closing_tags && ~nodeName.search(reClosingTagOptional)) {
+      return;
+    }
+
+    output.push('</' + nodeName + '>');
   }
 
   /**
