@@ -6,7 +6,8 @@ Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/misho
 
 Please note Unreadable is a young project so there are still some issues and TODOs.
 
-![unreadable --inspect --url http://www.youtube.com --output youtube.min.html](https://raw.github.com/JamieMason/Unreadable/master/static/screenshot.png)
+    $ unreadable --inspect --url http://www.youtube.com --output youtube.min.html
+    ✔ 12643 characters removed, 986/986 elements with layout unaffected by minification
 
 ## Usage
 
