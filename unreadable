@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // store the directory we're being run from
-var originalDir = __dirname;
+var originalDir = process.cwd();
 
 // operate from install dir
 process.chdir(process.cwd());
@@ -60,7 +60,7 @@ config = require('./src/configManager').init({
 });
 
 // get an absolute path to where to save the file
-outFile = path.resolve('./' + program.output);
+outFile = path.resolve(program.output.charAt(0) === '/' ? program.output : originalDir + '/' + program.output);
 
 // apply config to PhantomJS process
 command = command
