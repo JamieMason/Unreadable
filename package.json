@@ -1,6 +1,6 @@
 {
   "name": "unreadable",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "An intelligent/CSS-aware HTML Minifier and Optimizer",
   "keywords": ["command", "compress", "html", "minify", "optimization", "optimize", "performance", "phantomjs", "shell", "uglify"],
   "author": {
