@@ -4,8 +4,6 @@ Aggressively removes whitespace from HTML; while taking into account each elemen
 
 Inline JavaScript and CSS are minified using [UglifyJS](https://github.com/mishoo/UglifyJS) and [clean-css](https://github.com/GoalSmashers/clean-css) respectively.
 
-Please note Unreadable is a young project so there are still some issues and TODOs.
-
     $ unreadable --inspect --url http://www.youtube.com --output youtube.min.html
     ✔ 12643 characters removed, 986/986 elements with layout unaffected by minification
 
