@@ -67,7 +67,7 @@ exports.parseOutput = function(output) {
     json = null;
   }
   if(!json) {
-    exports.failMessage('Invalid JSON returned from Browser');
+    exports.failMessage('Unable to parse HTML fully, this can happen with invalid markup or some forms of inline JavaScript');
     process.exit(1);
   }
   return json;
